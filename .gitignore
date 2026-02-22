@@ -1,0 +1,19 @@
+# Dependencies
+vendor/
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*
+
+# OS
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Composer
+composer.lock
+
+# Logs
+*.log
+debug.log
