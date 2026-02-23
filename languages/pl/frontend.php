@@ -605,4 +605,9 @@ return array(
     'contact_social_title'         => 'Obserwuj nas',
     'contact_nip_label'            => 'NIP',
     'contact_crn_label'            => 'KRS / REGON',
-);
+    // ── Strona o nas ──
+    'about_team_title'             => 'Nasz zespół',
+    'about_values_title'           => 'Nasze wartości',
+    'about_stats_title'            => 'W liczbach',
+    'about_testimonials_title'     => 'Co mówią nasi klienci',
+    'about_timeline_title'         => 'Nasza historia',);

@@ -605,4 +605,11 @@ return array(
     'contact_social_title'         => 'Follow us',
     'contact_nip_label'            => 'Tax ID',
     'contact_crn_label'            => 'Reg. No.',
+
+    // ── About us page ──
+    'about_team_title'             => 'Our Team',
+    'about_values_title'           => 'Our Values',
+    'about_stats_title'            => 'In Numbers',
+    'about_testimonials_title'     => 'What Our Customers Say',
+    'about_timeline_title'         => 'Our Story',
 );
