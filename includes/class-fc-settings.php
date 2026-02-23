@@ -101,6 +101,8 @@ class FC_Settings {
         // Strony dodatkowe
         register_setting( 'fc_settings', 'fc_page_wishlist' );
         register_setting( 'fc_settings', 'fc_page_porownanie' );
+        register_setting( 'fc_settings', 'fc_page_o-nas' );
+        register_setting( 'fc_settings', 'fc_page_kontakt' );
 
         // Toggles funkcji
         register_setting( 'fc_features', 'fc_enable_wishlist' );
@@ -792,6 +794,8 @@ class FC_Settings {
                     'fc_page_moje-konto'    => fc__( 'set_my_account_page' ),
                     'fc_page_wishlist'      => fc__( 'set_wishlist' ),
                     'fc_page_porownanie'    => fc__( 'set_product_comparison' ),
+                    'fc_page_o-nas'         => fc__( 'set_about_page' ),
+                    'fc_page_kontakt'       => fc__( 'set_contact_page' ),
                 );
                 $page_shortcodes = array(
                     'fc_page_sklep'         => '[fc_shop]',
@@ -817,7 +821,9 @@ class FC_Settings {
                                     </option>
                                 <?php endforeach; ?>
                             </select>
+                            <?php if ( ! empty( $page_shortcodes[ $option_name ] ) ) : ?>
                             <code style="margin-left:8px;"><?php echo esc_html( $page_shortcodes[ $option_name ] ); ?></code>
+                            <?php endif; ?>
                         </td>
                     </tr>
                 <?php endforeach; ?>
