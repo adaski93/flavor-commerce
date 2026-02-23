@@ -1159,6 +1159,11 @@ return array(
     'cust_contact_map_source_custom' => 'Custom address',
     'cust_contact_map_custom'      => 'Address or embed URL',
     'cust_contact_map_custom_desc' => 'Enter an address or paste an iframe src URL from Google Maps.',
+    'cust_contact_map_position'     => 'Map position',
+    'cust_contact_map_pos_below_all'  => 'Below everything',
+    'cust_contact_map_pos_above_all'  => 'Above everything',
+    'cust_contact_map_pos_above_form' => 'Above the form',
+    'cust_contact_map_pos_below_form' => 'Below the form',
     'cust_contact_map_dark'        => 'Dark map style',
 
     // ── Social media (Customizer) ──

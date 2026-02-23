@@ -1159,6 +1159,11 @@ return array(
     'cust_contact_map_source_custom' => 'Własny adres',
     'cust_contact_map_custom'      => 'Adres lub URL embed',
     'cust_contact_map_custom_desc' => 'Wpisz adres lub wklej adres src z kodu iframe Google Maps.',
+    'cust_contact_map_position'     => 'Pozycja mapy',
+    'cust_contact_map_pos_below_all'  => 'Pod wszystkim',
+    'cust_contact_map_pos_above_all'  => 'Nad wszystkim',
+    'cust_contact_map_pos_above_form' => 'Nad formularzem',
+    'cust_contact_map_pos_below_form' => 'Pod formularzem',
     'cust_contact_map_dark'        => 'Ciemny styl mapy',
 
     // ── Social media (Customizer) ──
