@@ -1219,6 +1219,7 @@ return array(
     'cust_about_testimonials_quote' => 'Treść opinii',
     'cust_about_testimonials_author' => 'Autor',
     'cust_about_testimonials_role' => 'Rola / firma autora',
+    'cust_about_testimonials_country' => 'Kraj (flaga)',
     'cust_about_timeline'          => 'Oś czasu',
     'cust_about_timeline_title'    => 'Tytuł sekcji',
     'cust_about_timeline_add'      => 'Dodaj wpis',
