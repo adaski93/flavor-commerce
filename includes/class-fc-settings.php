@@ -2788,9 +2788,11 @@ class FC_Settings {
 
     /**
      * HTML loga sklepu do e-maili i faktur — pobiera logo z ustawień motywu (Wygląd → Dostosuj → Logo)
-     * SVG jest osadzane inline (Dompdf dobrze wspiera inline SVG)
+     * SVG jest osadzane inline dla PDF (Dompdf), a dla e-maili konwertowane na base64 PNG.
+     *
+     * @param string $context  'email' (domyślnie) lub 'pdf'.
      */
-    public static function get_logo_html() {
+    public static function get_logo_html( $context = 'email' ) {
         $logo_id = absint( get_theme_mod( 'custom_logo', 0 ) );
         if ( ! $logo_id ) return '';
 
@@ -2829,12 +2831,62 @@ class FC_Settings {
             $svg_content = preg_replace( '/(<svg\b[^>]*?)\s+height\s*=\s*"[^"]*"/', '$1', $svg_content );
             $svg_content = preg_replace( '/<svg\b/', '<svg width="' . $width . '" height="' . $height . '"', $svg_content, 1 );
 
-            return '<div style="max-width:200px;max-height:80px;display:block;margin:0 auto 12px;">' . $svg_content . '</div>';
+            // PDF (Dompdf) — inline SVG działa dobrze.
+            if ( $context === 'pdf' ) {
+                return '<div style="max-width:200px;max-height:80px;display:block;margin:0 auto 12px;">' . $svg_content . '</div>';
+            }
+
+            // E-mail — klienty nie obsługują inline SVG.
+            // Próba 1: konwertuj SVG → PNG za pomocą GD + Imagick
+            $png_data = self::svg_to_png_base64( $svg_path, $width, $height );
+            if ( $png_data ) {
+                return '<img src="' . $png_data . '" width="' . $width . '" height="' . $height . '" alt="' . esc_attr( get_option( 'fc_store_name', get_bloginfo( 'name' ) ) ) . '" style="max-width:200px;max-height:80px;display:block;margin:0 auto 12px;">';
+            }
+
+            // Próba 2: użyj URL do pliku SVG (część klientów wyświetli <img src="...svg">)
+            $svg_url = wp_get_attachment_url( $logo_id );
+            if ( $svg_url ) {
+                return '<img src="' . esc_url( $svg_url ) . '" width="' . $width . '" height="' . $height . '" alt="' . esc_attr( get_option( 'fc_store_name', get_bloginfo( 'name' ) ) ) . '" style="max-width:200px;max-height:80px;display:block;margin:0 auto 12px;">';
+            }
+
+            return '';
         }
 
         $logo_url = wp_get_attachment_image_url( $logo_id, 'medium' );
         if ( ! $logo_url ) return '';
         return '<img src="' . esc_url( $logo_url ) . '" alt="' . esc_attr( get_option( 'fc_store_name', get_bloginfo( 'name' ) ) ) . '" style="max-width:200px;max-height:80px;display:block;margin:0 auto 12px;">';
+    }
+
+    /**
+     * Konwertuj SVG na base64 PNG data URI (wymaga Imagick z obsługą SVG).
+     *
+     * @param string $svg_path  Ścieżka do pliku SVG.
+     * @param int    $width     Docelowa szerokość.
+     * @param int    $height    Docelowa wysokość.
+     * @return string|false     Data URI (data:image/png;base64,...) lub false.
+     */
+    private static function svg_to_png_base64( $svg_path, $width = 200, $height = 60 ) {
+        // Metoda 1: Imagick (najlepsza jakość)
+        if ( class_exists( 'Imagick' ) ) {
+            try {
+                $im = new Imagick();
+                $im->setResolution( 150, 150 );
+                $im->readImage( $svg_path );
+                $im->setImageFormat( 'png' );
+                $im->thumbnailImage( $width, $height, true );
+                $im->setImageBackgroundColor( new ImagickPixel( 'transparent' ) );
+                $png = $im->getImageBlob();
+                $im->clear();
+                $im->destroy();
+                if ( $png ) {
+                    return 'data:image/png;base64,' . base64_encode( $png );
+                }
+            } catch ( \Exception $e ) {
+                // Imagick nie obsługuje SVG na tym serwerze — kontynuuj.
+            }
+        }
+
+        return false;
     }
 
     /**

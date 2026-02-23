@@ -3,7 +3,7 @@
  * Plugin Name: Flavor Commerce
  * Plugin URI: https://flavor-theme.dev
  * Description: Prosta, ale kompletna wtyczka eCommerce dla WordPress. Zarządzanie produktami, koszyk, zamówienia i płatności.
- * Version: 2.0.0
+ * Version: 2.0.1
  * Author: Developer
  * Author URI: https://flavor-theme.dev
  * Text Domain: flavor-commerce
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Stałe wtyczki
-define( 'FC_VERSION', '2.0.0' );
+define( 'FC_VERSION', '2.0.1' );
 define( 'FC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'FC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'FC_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
