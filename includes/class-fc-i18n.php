@@ -184,8 +184,10 @@ final class FC_i18n {
  * @param string|null $context
  * @return string
  */
-function fc__( $key, $context = null ) {
-    return FC_i18n::get( $key, $context );
+if ( ! function_exists( 'fc__' ) ) {
+    function fc__( $key, $context = null ) {
+        return FC_i18n::get( $key, $context );
+    }
 }
 
 /**
@@ -194,8 +196,10 @@ function fc__( $key, $context = null ) {
  * @param string      $key
  * @param string|null $context
  */
-function fc_e( $key, $context = null ) {
-    FC_i18n::out( $key, $context );
+if ( ! function_exists( 'fc_e' ) ) {
+    function fc_e( $key, $context = null ) {
+        FC_i18n::out( $key, $context );
+    }
 }
 
 /**
@@ -206,7 +210,9 @@ function fc_e( $key, $context = null ) {
  * @param int    $count        The number
  * @return string
  */
-function fc_n( $singular_key, $plural_key, $count ) {
-    $key = ( (int) $count === 1 ) ? $singular_key : $plural_key;
-    return sprintf( fc__( $key ), $count );
+if ( ! function_exists( 'fc_n' ) ) {
+    function fc_n( $singular_key, $plural_key, $count ) {
+        $key = ( (int) $count === 1 ) ? $singular_key : $plural_key;
+        return sprintf( fc__( $key ), $count );
+    }
 }
