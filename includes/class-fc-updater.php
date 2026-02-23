@@ -30,6 +30,9 @@ class FC_Updater {
     /** @var object|null  Cached release data for this request. */
     private $release = null;
 
+    /** @var string  Transient name for caching GitHub release data. */
+    private $transient_key = 'fc_github_release';
+
     /**
      * @param string $plugin_file  __FILE__ of the main plugin file.
      * @param string $github_repo  "owner/repo" on GitHub.
@@ -48,24 +51,41 @@ class FC_Updater {
 
         // Hook into WordPress update system.
         add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'check_update' ) );
+        add_filter( 'site_transient_update_plugins',         array( $this, 'check_update' ) );
         add_filter( 'plugins_api',                            array( $this, 'plugin_info' ), 10, 3 );
         add_filter( 'upgrader_post_install',                  array( $this, 'post_install' ), 10, 3 );
+
+        // Link "Sprawdź aktualizacje" w wierszu wtyczki.
+        add_filter( 'plugin_action_links_' . $this->basename, array( $this, 'action_links' ) );
+
+        // Obsługa ręcznego sprawdzenia aktualizacji.
+        add_action( 'admin_init', array( $this, 'handle_force_check' ) );
     }
 
     /**
-     * Fetch the latest release from GitHub API (cached per request).
+     * Fetch the latest release from GitHub API (cached in transient for 6 hours).
      *
+     * @param bool $force  Skip cache and fetch fresh data.
      * @return object|false  Release object or false on failure.
      */
-    private function get_latest_release() {
-        if ( $this->release !== null ) {
+    private function get_latest_release( $force = false ) {
+        if ( ! $force && $this->release !== null ) {
             return $this->release;
+        }
+
+        // Check transient cache first (6h).
+        if ( ! $force ) {
+            $cached = get_transient( $this->transient_key );
+            if ( $cached !== false ) {
+                $this->release = $cached;
+                return $this->release;
+            }
         }
 
         $url = 'https://api.github.com/repos/' . $this->repo . '/releases/latest';
 
         $response = wp_remote_get( $url, array(
-            'timeout' => 10,
+            'timeout' => 15,
             'headers' => array(
                 'Accept'     => 'application/vnd.github.v3+json',
                 'User-Agent' => 'WordPress/' . get_bloginfo( 'version' ) . '; ' . home_url(),
@@ -85,6 +105,10 @@ class FC_Updater {
         }
 
         $this->release = $body;
+
+        // Cache for 6 hours.
+        set_transient( $this->transient_key, $body, 6 * HOUR_IN_SECONDS );
+
         return $this->release;
     }
 
@@ -125,8 +149,9 @@ class FC_Updater {
      * @return object
      */
     public function check_update( $transient ) {
-        if ( empty( $transient->checked ) ) {
-            return $transient;
+        // Nie blokuj gdy $transient->checked jest pusty — wiele serwerów tego nie wypełnia.
+        if ( ! is_object( $transient ) ) {
+            $transient = new stdClass();
         }
 
         $release = $this->get_latest_release();
@@ -137,6 +162,9 @@ class FC_Updater {
         $remote_version = $this->tag_to_version( $release->tag_name );
 
         if ( version_compare( $remote_version, $this->version, '>' ) ) {
+            if ( ! isset( $transient->response ) || ! is_array( $transient->response ) ) {
+                $transient->response = array();
+            }
             $transient->response[ $this->basename ] = (object) array(
                 'slug'        => $this->slug,
                 'plugin'      => $this->basename,
@@ -192,6 +220,70 @@ class FC_Updater {
     }
 
     /**
+     * Add "Check for updates" link in plugin action links.
+     */
+    public function action_links( $links ) {
+        $check_url = wp_nonce_url(
+            add_query_arg( 'fc_force_update_check', '1', admin_url( 'plugins.php' ) ),
+            'fc_force_update_check'
+        );
+        $links[] = '<a href="' . esc_url( $check_url ) . '">' . esc_html__( 'Sprawdź aktualizacje', 'flavor-commerce' ) . '</a>';
+        return $links;
+    }
+
+    /**
+     * Handle manual update check — clears cache and forces re-check.
+     */
+    public function handle_force_check() {
+        if ( empty( $_GET['fc_force_update_check'] ) || ! current_user_can( 'update_plugins' ) ) {
+            return;
+        }
+        if ( ! wp_verify_nonce( $_GET['_wpnonce'] ?? '', 'fc_force_update_check' ) ) {
+            return;
+        }
+
+        // Clear our cached release data.
+        delete_transient( $this->transient_key );
+        $this->release = null;
+
+        // Force WordPress to re-check plugin updates.
+        delete_site_transient( 'update_plugins' );
+
+        // Fetch fresh data from GitHub.
+        $release = $this->get_latest_release( true );
+
+        if ( $release ) {
+            $remote_version = $this->tag_to_version( $release->tag_name );
+            if ( version_compare( $remote_version, $this->version, '>' ) ) {
+                // Inject update into transient immediately.
+                $transient = get_site_transient( 'update_plugins' );
+                if ( ! is_object( $transient ) ) {
+                    $transient = new stdClass();
+                }
+                $transient->response[ $this->basename ] = (object) array(
+                    'slug'        => $this->slug,
+                    'plugin'      => $this->basename,
+                    'new_version' => $remote_version,
+                    'url'         => $release->html_url,
+                    'package'     => $this->get_zip_url( $release ),
+                    'icons'       => array(),
+                    'banners'     => array(),
+                    'tested'      => '',
+                    'requires'    => '5.0',
+                    'requires_php'=> '7.4',
+                );
+                set_site_transient( 'update_plugins', $transient );
+
+                wp_redirect( admin_url( 'plugins.php?fc_update_found=1' ) );
+                exit;
+            }
+        }
+
+        wp_redirect( admin_url( 'plugins.php?fc_update_found=0' ) );
+        exit;
+    }
+
+    /**
      * After upgrade, make sure the directory name matches the plugin slug.
      * Handles both GitHub source zips (owner-repo-hash) and uploaded asset zips
      * that may contain a nested folder (e.g. flavor-commerce/flavor-commerce/).
@@ -228,6 +320,9 @@ class FC_Updater {
                 $result['destination'] = $proper_dir;
             }
         }
+
+        // Clear update cache after successful install.
+        delete_transient( $this->transient_key );
 
         // Re-activate if it was active.
         if ( is_plugin_active( $this->basename ) ) {
