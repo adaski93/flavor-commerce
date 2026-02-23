@@ -52,6 +52,15 @@ final class FC_i18n {
     }
 
     /**
+     * Force-reload translations (e.g. after changing the language option at runtime).
+     */
+    public static function reload() {
+        self::$strings      = array();
+        self::$initialised  = false;
+        self::init();
+    }
+
+    /**
      * Load a translation file if not already loaded.
      *
      * @param string $context 'frontend' or 'admin'

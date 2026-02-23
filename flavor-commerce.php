@@ -3,7 +3,7 @@
  * Plugin Name: Flavor Commerce
  * Plugin URI: https://flavor-theme.dev
  * Description: Prosta, ale kompletna wtyczka eCommerce dla WordPress. Zarządzanie produktami, koszyk, zamówienia i płatności.
- * Version: 1.8.0
+ * Version: 1.9.0
  * Author: Developer
  * Author URI: https://flavor-theme.dev
  * Text Domain: flavor-commerce
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Stałe wtyczki
-define( 'FC_VERSION', '1.8.3' );
+define( 'FC_VERSION', '1.9.0' );
 define( 'FC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'FC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'FC_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
@@ -68,6 +68,7 @@ final class Flavor_Commerce {
         require_once FC_PLUGIN_DIR . 'includes/class-fc-frontend-features.php';
         require_once FC_PLUGIN_DIR . 'includes/class-fc-stripe.php';
         require_once FC_PLUGIN_DIR . 'includes/class-fc-updater.php';
+        require_once FC_PLUGIN_DIR . 'includes/class-fc-setup-wizard.php';
     }
 
     private function init_hooks() {
@@ -111,6 +112,7 @@ final class Flavor_Commerce {
         FC_Wishlist::init();
         FC_Frontend_Features::init();
         FC_Stripe::init();
+        FC_Setup_Wizard::init();
     }
 
     /**
@@ -122,6 +124,9 @@ final class Flavor_Commerce {
             self::$instance = new self();
         }
         self::$instance->activate();
+
+        // Redirect to setup wizard after activation
+        set_transient( 'fc_activation_redirect', 1, 60 );
     }
 
     /**
