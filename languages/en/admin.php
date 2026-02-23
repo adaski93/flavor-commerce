@@ -744,6 +744,7 @@ return array(
     'set_store_features' => 'Store features',
     'set_store_language_frontend' => 'Store language (frontend)',
     'set_store_logo_set_in_the_store_tab' => 'Store logo (set in the Store tab)',
+    'email_logo_desc_var' => 'Email logo (set above)',
     'set_store_name' => 'Store name',
     'set_store_pages' => 'Store pages',
     'set_store_settings' => 'Store settings',
@@ -1082,6 +1083,15 @@ return array(
     'wizard_mode_light'          => 'Light',
     'wizard_mode_dark'           => 'Dark',
     'wizard_accent_preview'      => 'Preview',
+
+    // Email logo
+    'email_logo_title'        => 'Email logo',
+    'email_logo_desc'         => 'Choose a PNG/JPG image to be displayed as the logo in email headers. Do not use SVG — email clients do not support it.',
+    'email_logo_select'       => 'Select logo',
+    'email_logo_change'       => 'Change logo',
+    'email_logo_remove'       => 'Remove',
+    'email_logo_media_title'  => 'Select email logo',
+    'email_logo_media_button' => 'Use this image',
 
     // SMTP
     'smtp_title'              => 'SMTP Configuration',

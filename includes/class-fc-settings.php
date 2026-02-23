@@ -1924,6 +1924,11 @@ class FC_Settings {
                 'body'    => $sanitize_email_html( $_POST['fc_email_body']['stock_notify'] ?? '' ),
             );
             update_option( $save_option_key, $templates );
+            // Logo e-mail
+            if ( isset( $_POST['fc_email_logo_id'] ) ) {
+                update_option( 'fc_email_logo_id', absint( $_POST['fc_email_logo_id'] ) );
+            }
+
             echo '<div class="notice notice-success is-dismissible"><p>' . fc__( 'set_email_templates_saved' ) . '</p></div>';
 
             // Reload po zapisie z tego samego języka
@@ -1972,6 +1977,54 @@ class FC_Settings {
             </div>
             <?php endif; ?>
 
+            <?php
+            // --- Email Logo Upload ---
+            $email_logo_id  = absint( get_option( 'fc_email_logo_id', 0 ) );
+            $email_logo_url = $email_logo_id ? wp_get_attachment_image_url( $email_logo_id, 'medium' ) : '';
+            ?>
+            <div style="margin-bottom:20px;padding:16px 20px;background:#f9f9f9;border:1px solid #ddd;border-radius:8px;">
+                <h3 style="margin:0 0 8px;font-size:14px;"><?php fc_e( 'email_logo_title' ); ?></h3>
+                <p class="description" style="margin:0 0 12px;"><?php fc_e( 'email_logo_desc' ); ?></p>
+                <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                    <div id="fc-email-logo-preview" style="<?php echo $email_logo_url ? '' : 'display:none;'; ?>">
+                        <img src="<?php echo esc_url( $email_logo_url ); ?>" style="max-width:200px;max-height:80px;border:1px solid #ccc;border-radius:4px;padding:4px;background:#fff;">
+                    </div>
+                    <input type="hidden" name="fc_email_logo_id" id="fc-email-logo-id" value="<?php echo $email_logo_id; ?>">
+                    <button type="button" class="button" id="fc-email-logo-select">
+                        <?php echo $email_logo_url ? fc__( 'email_logo_change' ) : fc__( 'email_logo_select' ); ?>
+                    </button>
+                    <button type="button" class="button" id="fc-email-logo-remove" style="<?php echo $email_logo_url ? '' : 'display:none;'; ?>color:#b32d2e;">
+                        <?php fc_e( 'email_logo_remove' ); ?>
+                    </button>
+                </div>
+            </div>
+            <script>
+            jQuery(function($){
+                var frame;
+                $('#fc-email-logo-select').on('click',function(e){
+                    e.preventDefault();
+                    if(frame){frame.open();return;}
+                    frame=wp.media({title:'<?php echo esc_js( fc__( 'email_logo_media_title' ) ); ?>',button:{text:'<?php echo esc_js( fc__( 'email_logo_media_button' ) ); ?>'},library:{type:['image/png','image/jpeg','image/gif','image/webp']},multiple:false});
+                    frame.on('select',function(){
+                        var a=frame.state().get('selection').first().toJSON();
+                        $('#fc-email-logo-id').val(a.id);
+                        var url=a.sizes&&a.sizes.medium?a.sizes.medium.url:a.url;
+                        $('#fc-email-logo-preview').show().find('img').attr('src',url);
+                        $('#fc-email-logo-select').text('<?php echo esc_js( fc__( 'email_logo_change' ) ); ?>');
+                        $('#fc-email-logo-remove').show();
+                    });
+                    frame.open();
+                });
+                $('#fc-email-logo-remove').on('click',function(e){
+                    e.preventDefault();
+                    $('#fc-email-logo-id').val('0');
+                    $('#fc-email-logo-preview').hide();
+                    $('#fc-email-logo-select').text('<?php echo esc_js( fc__( 'email_logo_select' ) ); ?>');
+                    $(this).hide();
+                });
+            });
+            </script>
+
             <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin-bottom:16px;flex-wrap:wrap;">
                 <div class="description" style="margin:0;flex:1;min-width:300px;">
                     <strong><?php fc_e( 'set_available_variables_in_templates' ); ?></strong>
@@ -1979,7 +2032,7 @@ class FC_Settings {
                     <div class="fc-email-vars">
                         <div class="fc-ev"><code>{header}</code><span><?php fc_e( 'set_shared_header_html_editable_above' ); ?></span></div>
                         <div class="fc-ev"><code>{footer}</code><span><?php fc_e( 'set_shared_footer_html_editable_above' ); ?></span></div>
-                        <div class="fc-ev"><code>{logo}</code><span><?php fc_e( 'set_store_logo_set_in_the_store_tab' ); ?></span></div>
+                        <div class="fc-ev"><code>{logo}</code><span><?php fc_e( 'email_logo_desc_var' ); ?></span></div>
                         <div class="fc-ev"><code>{store_name}</code><span><?php fc_e( 'set_store_name' ); ?></span></div>
                         <div class="fc-ev"><code>{order_number}</code><span><?php fc_e( 'set_order_number' ); ?></span></div>
                         <div class="fc-ev"><code>{order_date}</code><span><?php fc_e( 'set_order_date' ); ?></span></div>
@@ -2787,153 +2840,17 @@ class FC_Settings {
     }
 
     /**
-     * HTML loga sklepu do e-maili i faktur — pobiera logo z ustawień motywu (Wygląd → Dostosuj → Logo)
-     * SVG jest osadzane inline dla PDF (Dompdf), a dla e-maili konwertowane na base64 PNG.
-     *
-     * @param string $context  'email' (domyślnie) lub 'pdf'.
+     * HTML loga sklepu do e-maili — pobiera logo z opcji fc_email_logo_id (zakładka E-maile).
+     * Wymaga PNG/JPG — SVG nie jest obsługiwane przez klienty e-mail.
      */
-    public static function get_logo_html( $context = 'email' ) {
-        $logo_id = absint( get_theme_mod( 'custom_logo', 0 ) );
+    public static function get_logo_html() {
+        $logo_id = absint( get_option( 'fc_email_logo_id', 0 ) );
         if ( ! $logo_id ) return '';
-
-        $mime = get_post_mime_type( $logo_id );
-        $is_svg = ( $mime === 'image/svg+xml' );
-
-        if ( $is_svg ) {
-            $svg_path = get_attached_file( $logo_id );
-            if ( ! $svg_path || ! file_exists( $svg_path ) ) return '';
-
-            $svg_content = file_get_contents( $svg_path );
-            if ( ! $svg_content ) return '';
-
-            // Usuń deklarację XML i komentarze — zostawiamy czysty <svg>
-            $svg_content = preg_replace( '/<\?xml[^?]*\?>/', '', $svg_content );
-            $svg_content = preg_replace( '/<!--.*?-->/s', '', $svg_content );
-            $svg_content = trim( $svg_content );
-
-            // Oblicz proporcjonalną wysokość na podstawie viewBox
-            $width = 200;
-            $height = 60;
-            if ( preg_match( '/viewBox=["\'][\s]*([\d.]+)[\s]+([\d.]+)[\s]+([\d.]+)[\s]+([\d.]+)/', $svg_content, $vb ) ) {
-                $vb_w = floatval( $vb[3] );
-                $vb_h = floatval( $vb[4] );
-                if ( $vb_w > 0 && $vb_h > 0 ) {
-                    $height = intval( $width * $vb_h / $vb_w );
-                    if ( $height > 80 ) {
-                        $height = 80;
-                        $width = intval( 80 * $vb_w / $vb_h );
-                    }
-                }
-            }
-
-            // Usuń istniejące width/height z tagu <svg> i ustaw nowe
-            $svg_content = preg_replace( '/(<svg\b[^>]*?)\s+width\s*=\s*"[^"]*"/', '$1', $svg_content );
-            $svg_content = preg_replace( '/(<svg\b[^>]*?)\s+height\s*=\s*"[^"]*"/', '$1', $svg_content );
-            $svg_content = preg_replace( '/<svg\b/', '<svg width="' . $width . '" height="' . $height . '"', $svg_content, 1 );
-
-            // PDF (Dompdf) — inline SVG działa dobrze.
-            if ( $context === 'pdf' ) {
-                return '<div style="max-width:200px;max-height:80px;display:block;margin:0 auto 12px;">' . $svg_content . '</div>';
-            }
-
-            // E-mail — klienty (Gmail, Outlook) blokują inline SVG, SVG URL i base64 data URI.
-            // Jedyne rozwiązanie: wygenerować prawdziwy plik PNG i podać jego URL.
-            $png_url = self::get_svg_png_url( $logo_id, $svg_path, $width, $height );
-            if ( $png_url ) {
-                return '<img src="' . esc_url( $png_url ) . '" width="' . $width . '" height="' . $height . '" alt="' . esc_attr( get_option( 'fc_store_name', get_bloginfo( 'name' ) ) ) . '" style="max-width:200px;max-height:80px;display:block;margin:0 auto 12px;">';
-            }
-
-            // Ostateczny fallback — tekstowe "logo"
-            $store_name = get_option( 'fc_store_name', get_bloginfo( 'name' ) );
-            return '<div style="font-size:22px;font-weight:700;text-align:center;margin:0 auto 12px;color:#ffffff;">' . esc_html( $store_name ) . '</div>';
-        }
 
         $logo_url = wp_get_attachment_image_url( $logo_id, 'medium' );
         if ( ! $logo_url ) return '';
+
         return '<img src="' . esc_url( $logo_url ) . '" alt="' . esc_attr( get_option( 'fc_store_name', get_bloginfo( 'name' ) ) ) . '" style="max-width:200px;max-height:80px;display:block;margin:0 auto 12px;">';
-    }
-
-    /**
-     * Wygeneruj plik PNG z SVG i zwróć jego URL.
-     * Plik jest cache'owany w wp-content/uploads/fc-logo-cache/.
-     * Regenerowany tylko gdy SVG się zmieni (porównanie mtime).
-     *
-     * @param int    $logo_id   Attachment ID.
-     * @param string $svg_path  Ścieżka do pliku SVG.
-     * @param int    $width     Docelowa szerokość.
-     * @param int    $height    Docelowa wysokość.
-     * @return string|false     URL do pliku PNG lub false.
-     */
-    private static function get_svg_png_url( $logo_id, $svg_path, $width = 200, $height = 60 ) {
-        $upload_dir = wp_upload_dir();
-        $cache_dir  = $upload_dir['basedir'] . '/fc-logo-cache';
-        $cache_url  = $upload_dir['baseurl'] . '/fc-logo-cache';
-
-        // Nazwa pliku cache na podstawie ID + mtime SVG
-        $svg_mtime  = filemtime( $svg_path );
-        $cache_name = 'logo-' . $logo_id . '-' . $svg_mtime . '-' . $width . 'x' . $height . '.png';
-        $cache_path = $cache_dir . '/' . $cache_name;
-        $cache_file_url = $cache_url . '/' . $cache_name;
-
-        // Jeśli cache istnieje — zwróć URL
-        if ( file_exists( $cache_path ) ) {
-            return $cache_file_url;
-        }
-
-        // Utwórz katalog cache
-        if ( ! is_dir( $cache_dir ) ) {
-            wp_mkdir_p( $cache_dir );
-        }
-
-        // Usuń stare pliki cache dla tego logo
-        $old_files = glob( $cache_dir . '/logo-' . $logo_id . '-*.png' );
-        if ( $old_files ) {
-            foreach ( $old_files as $old ) {
-                @unlink( $old );
-            }
-        }
-
-        // Metoda 1: Imagick
-        if ( class_exists( 'Imagick' ) ) {
-            try {
-                $im = new Imagick();
-                $im->setResolution( 150, 150 );
-                $im->setBackgroundColor( new ImagickPixel( 'transparent' ) );
-                $im->readImage( $svg_path );
-                $im->setImageFormat( 'png32' );
-                $im->thumbnailImage( $width * 2, $height * 2, true ); // 2x dla retina
-                $im->writeImage( $cache_path );
-                $im->clear();
-                $im->destroy();
-                if ( file_exists( $cache_path ) ) {
-                    return $cache_file_url;
-                }
-            } catch ( \Exception $e ) {
-                // Imagick nie obsługuje SVG — próbuj GD
-            }
-        }
-
-        // Metoda 2: exec() z Inkscape lub rsvg-convert (częste na Linux)
-        if ( function_exists( 'exec' ) ) {
-            $escaped_svg = escapeshellarg( $svg_path );
-            $escaped_png = escapeshellarg( $cache_path );
-            $w2 = $width * 2;
-            $h2 = $height * 2;
-
-            // rsvg-convert (librsvg)
-            @exec( "rsvg-convert -w {$w2} -h {$h2} {$escaped_svg} -o {$escaped_png} 2>&1", $out, $ret );
-            if ( $ret === 0 && file_exists( $cache_path ) ) {
-                return $cache_file_url;
-            }
-
-            // Inkscape
-            @exec( "inkscape {$escaped_svg} --export-png={$escaped_png} --export-width={$w2} --export-height={$h2} 2>&1", $out2, $ret2 );
-            if ( $ret2 === 0 && file_exists( $cache_path ) ) {
-                return $cache_file_url;
-            }
-        }
-
-        return false;
     }
 
     /**

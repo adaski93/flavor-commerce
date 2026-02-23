@@ -744,6 +744,7 @@ return array(
     'set_store_features' => 'Funkcjonalności sklepu',
     'set_store_language_frontend' => 'Język sklepu (frontend)',
     'set_store_logo_set_in_the_store_tab' => 'Logo sklepu (ustawiane w zakładce Sklep)',
+    'email_logo_desc_var' => 'Logo e-mail (ustawiane powyżej)',
     'set_store_name' => 'Nazwa sklepu',
     'set_store_pages' => 'Strony sklepu',
     'set_store_settings' => 'Ustawienia sklepu',
@@ -1082,6 +1083,15 @@ return array(
     'wizard_mode_light'          => 'Jasny',
     'wizard_mode_dark'           => 'Ciemny',
     'wizard_accent_preview'      => 'Podgląd',
+
+    // Email logo
+    'email_logo_title'        => 'Logo w e-mailach',
+    'email_logo_desc'         => 'Wybierz obraz PNG/JPG, który będzie wyświetlany jako logo w nagłówkach e-maili. Nie używaj SVG — klienty e-mail go nie obsługują.',
+    'email_logo_select'       => 'Wybierz logo',
+    'email_logo_change'       => 'Zmień logo',
+    'email_logo_remove'       => 'Usuń',
+    'email_logo_media_title'  => 'Wybierz logo do e-maili',
+    'email_logo_media_button' => 'Użyj tego obrazu',
 
     // SMTP
     'smtp_title'              => 'Konfiguracja SMTP',
