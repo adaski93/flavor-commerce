@@ -2836,20 +2836,16 @@ class FC_Settings {
                 return '<div style="max-width:200px;max-height:80px;display:block;margin:0 auto 12px;">' . $svg_content . '</div>';
             }
 
-            // E-mail — klienty nie obsługują inline SVG.
-            // Próba 1: konwertuj SVG → PNG za pomocą GD + Imagick
-            $png_data = self::svg_to_png_base64( $svg_path, $width, $height );
-            if ( $png_data ) {
-                return '<img src="' . $png_data . '" width="' . $width . '" height="' . $height . '" alt="' . esc_attr( get_option( 'fc_store_name', get_bloginfo( 'name' ) ) ) . '" style="max-width:200px;max-height:80px;display:block;margin:0 auto 12px;">';
+            // E-mail — klienty (Gmail, Outlook) blokują inline SVG, SVG URL i base64 data URI.
+            // Jedyne rozwiązanie: wygenerować prawdziwy plik PNG i podać jego URL.
+            $png_url = self::get_svg_png_url( $logo_id, $svg_path, $width, $height );
+            if ( $png_url ) {
+                return '<img src="' . esc_url( $png_url ) . '" width="' . $width . '" height="' . $height . '" alt="' . esc_attr( get_option( 'fc_store_name', get_bloginfo( 'name' ) ) ) . '" style="max-width:200px;max-height:80px;display:block;margin:0 auto 12px;">';
             }
 
-            // Próba 2: użyj URL do pliku SVG (część klientów wyświetli <img src="...svg">)
-            $svg_url = wp_get_attachment_url( $logo_id );
-            if ( $svg_url ) {
-                return '<img src="' . esc_url( $svg_url ) . '" width="' . $width . '" height="' . $height . '" alt="' . esc_attr( get_option( 'fc_store_name', get_bloginfo( 'name' ) ) ) . '" style="max-width:200px;max-height:80px;display:block;margin:0 auto 12px;">';
-            }
-
-            return '';
+            // Ostateczny fallback — tekstowe "logo"
+            $store_name = get_option( 'fc_store_name', get_bloginfo( 'name' ) );
+            return '<div style="font-size:22px;font-weight:700;text-align:center;margin:0 auto 12px;color:#ffffff;">' . esc_html( $store_name ) . '</div>';
         }
 
         $logo_url = wp_get_attachment_image_url( $logo_id, 'medium' );
@@ -2858,31 +2854,82 @@ class FC_Settings {
     }
 
     /**
-     * Konwertuj SVG na base64 PNG data URI (wymaga Imagick z obsługą SVG).
+     * Wygeneruj plik PNG z SVG i zwróć jego URL.
+     * Plik jest cache'owany w wp-content/uploads/fc-logo-cache/.
+     * Regenerowany tylko gdy SVG się zmieni (porównanie mtime).
      *
+     * @param int    $logo_id   Attachment ID.
      * @param string $svg_path  Ścieżka do pliku SVG.
      * @param int    $width     Docelowa szerokość.
      * @param int    $height    Docelowa wysokość.
-     * @return string|false     Data URI (data:image/png;base64,...) lub false.
+     * @return string|false     URL do pliku PNG lub false.
      */
-    private static function svg_to_png_base64( $svg_path, $width = 200, $height = 60 ) {
-        // Metoda 1: Imagick (najlepsza jakość)
+    private static function get_svg_png_url( $logo_id, $svg_path, $width = 200, $height = 60 ) {
+        $upload_dir = wp_upload_dir();
+        $cache_dir  = $upload_dir['basedir'] . '/fc-logo-cache';
+        $cache_url  = $upload_dir['baseurl'] . '/fc-logo-cache';
+
+        // Nazwa pliku cache na podstawie ID + mtime SVG
+        $svg_mtime  = filemtime( $svg_path );
+        $cache_name = 'logo-' . $logo_id . '-' . $svg_mtime . '-' . $width . 'x' . $height . '.png';
+        $cache_path = $cache_dir . '/' . $cache_name;
+        $cache_file_url = $cache_url . '/' . $cache_name;
+
+        // Jeśli cache istnieje — zwróć URL
+        if ( file_exists( $cache_path ) ) {
+            return $cache_file_url;
+        }
+
+        // Utwórz katalog cache
+        if ( ! is_dir( $cache_dir ) ) {
+            wp_mkdir_p( $cache_dir );
+        }
+
+        // Usuń stare pliki cache dla tego logo
+        $old_files = glob( $cache_dir . '/logo-' . $logo_id . '-*.png' );
+        if ( $old_files ) {
+            foreach ( $old_files as $old ) {
+                @unlink( $old );
+            }
+        }
+
+        // Metoda 1: Imagick
         if ( class_exists( 'Imagick' ) ) {
             try {
                 $im = new Imagick();
                 $im->setResolution( 150, 150 );
+                $im->setBackgroundColor( new ImagickPixel( 'transparent' ) );
                 $im->readImage( $svg_path );
-                $im->setImageFormat( 'png' );
-                $im->thumbnailImage( $width, $height, true );
-                $im->setImageBackgroundColor( new ImagickPixel( 'transparent' ) );
-                $png = $im->getImageBlob();
+                $im->setImageFormat( 'png32' );
+                $im->thumbnailImage( $width * 2, $height * 2, true ); // 2x dla retina
+                $im->writeImage( $cache_path );
                 $im->clear();
                 $im->destroy();
-                if ( $png ) {
-                    return 'data:image/png;base64,' . base64_encode( $png );
+                if ( file_exists( $cache_path ) ) {
+                    return $cache_file_url;
                 }
             } catch ( \Exception $e ) {
-                // Imagick nie obsługuje SVG na tym serwerze — kontynuuj.
+                // Imagick nie obsługuje SVG — próbuj GD
+            }
+        }
+
+        // Metoda 2: exec() z Inkscape lub rsvg-convert (częste na Linux)
+        if ( function_exists( 'exec' ) ) {
+            $escaped_svg = escapeshellarg( $svg_path );
+            $escaped_png = escapeshellarg( $cache_path );
+            $w2 = $width * 2;
+            $h2 = $height * 2;
+
+            // rsvg-convert (librsvg)
+            @exec( "rsvg-convert -w {$w2} -h {$h2} {$escaped_svg} -o {$escaped_png} 2>&1", $out, $ret );
+            if ( $ret === 0 && file_exists( $cache_path ) ) {
+                return $cache_file_url;
+            }
+
+            // Inkscape
+            @exec( "inkscape {$escaped_svg} --export-png={$escaped_png} --export-width={$w2} --export-height={$h2} 2>&1", $out2, $ret2 );
+            if ( $ret2 === 0 && file_exists( $cache_path ) ) {
+                return $cache_file_url;
             }
         }
 
