@@ -123,16 +123,12 @@ class FC_Product_Admin {
             'gallery'      => array(),
             'attributes'   => array(),
             'variants'     => array(),
-            'digital_file' => '',
-            'download_limit' => '',
             'publish_date' => '',
             'shipping_date' => '',
             'length'          => '',
             'width'           => '',
             'height'          => '',
             'tax_class'       => '',
-            'external_url'    => '',
-            'external_text'   => '',
             'min_quantity'    => '',
             'max_quantity'    => '',
             'sale_date_from'  => '',
@@ -143,7 +139,6 @@ class FC_Product_Admin {
             'crosssell_ids'   => array(),
             'purchase_note'   => '',
             'tags'            => array(),
-            'grouped_ids'     => array(),
         );
 
         if ( $is_edit ) {
@@ -182,8 +177,6 @@ class FC_Product_Admin {
             if ( ! is_array( $data['attributes'] ) ) $data['attributes'] = array();
             $data['variants']       = get_post_meta( $product_id, '_fc_variants', true );
             if ( ! is_array( $data['variants'] ) ) $data['variants'] = array();
-            $data['digital_file']   = get_post_meta( $product_id, '_fc_digital_file', true );
-            $data['download_limit'] = get_post_meta( $product_id, '_fc_download_limit', true );
             $data['publish_date']   = get_post_meta( $product_id, '_fc_publish_date', true );
             $data['shipping_date']  = get_post_meta( $product_id, '_fc_shipping_date', true );
 
@@ -199,8 +192,6 @@ class FC_Product_Admin {
             $data['width']           = get_post_meta( $product_id, '_fc_width', true );
             $data['height']          = get_post_meta( $product_id, '_fc_height', true );
             $data['tax_class']       = get_post_meta( $product_id, '_fc_tax_class', true );
-            $data['external_url']    = get_post_meta( $product_id, '_fc_external_url', true );
-            $data['external_text']   = get_post_meta( $product_id, '_fc_external_text', true );
             $data['min_quantity']    = get_post_meta( $product_id, '_fc_min_quantity', true );
             $data['max_quantity']    = get_post_meta( $product_id, '_fc_max_quantity', true );
             $data['sale_date_from']  = get_post_meta( $product_id, '_fc_sale_date_from', true );
@@ -214,9 +205,6 @@ class FC_Product_Admin {
             $data['crosssell_ids']   = get_post_meta( $product_id, '_fc_crosssell_ids', true );
             if ( ! is_array( $data['crosssell_ids'] ) ) $data['crosssell_ids'] = array();
             $data['purchase_note']   = get_post_meta( $product_id, '_fc_purchase_note', true );
-            $data['grouped_ids']     = get_post_meta( $product_id, '_fc_grouped_ids', true );
-            if ( ! is_array( $data['grouped_ids'] ) ) $data['grouped_ids'] = array();
-
 
         }
 
@@ -289,24 +277,6 @@ class FC_Product_Admin {
                                         <span class="fc-type-label"><?php fc_e( 'prod_variable_product' ); ?></span>
                                         <span class="fc-type-desc"><?php fc_e( 'prod_e_g_different_sizes_colors' ); ?></span>
                                     </label>
-                                    <label class="fc-type-option <?php echo $data['product_type'] === 'digital' ? 'active' : ''; ?>">
-                                        <input type="radio" name="fc_product_type" value="digital" <?php checked( $data['product_type'], 'digital' ); ?>>
-                                        <span class="dashicons dashicons-download"></span>
-                                        <span class="fc-type-label"><?php fc_e( 'prod_digital_product' ); ?></span>
-                                        <span class="fc-type-desc"><?php fc_e( 'prod_downloadable_file' ); ?></span>
-                                    </label>
-                                    <label class="fc-type-option <?php echo $data['product_type'] === 'external' ? 'active' : ''; ?>">
-                                        <input type="radio" name="fc_product_type" value="external" <?php checked( $data['product_type'], 'external' ); ?>>
-                                        <span class="dashicons dashicons-admin-links"></span>
-                                        <span class="fc-type-label"><?php fc_e( 'prod_external_product' ); ?></span>
-                                        <span class="fc-type-desc"><?php fc_e( 'prod_link_to_another_store' ); ?></span>
-                                    </label>
-                                    <label class="fc-type-option <?php echo $data['product_type'] === 'grouped' ? 'active' : ''; ?>">
-                                        <input type="radio" name="fc_product_type" value="grouped" <?php checked( $data['product_type'], 'grouped' ); ?>>
-                                        <span class="dashicons dashicons-screenoptions"></span>
-                                        <span class="fc-type-label"><?php fc_e( 'prod_product_bundle' ); ?></span>
-                                        <span class="fc-type-desc"><?php fc_e( 'prod_related_products_group' ); ?></span>
-                                    </label>
                                 </div>
                             </div>
                         </div>
@@ -340,8 +310,8 @@ class FC_Product_Admin {
                             </div>
                         </div>
 
-                        <!-- Ceny (simple + digital) -->
-                        <div class="fc-form-card fc-section-simple fc-section-digital" style="<?php echo $data['product_type'] === 'variable' ? 'display:none;' : ''; ?>">
+                        <!-- Ceny (simple) -->
+                        <div class="fc-form-card fc-section-simple" style="<?php echo $data['product_type'] === 'variable' ? 'display:none;' : ''; ?>">
                             <div class="fc-card-header"><?php fc_e( 'prod_prices' ); ?></div>
                             <div class="fc-card-body">
                                 <div class="fc-form-row fc-two-cols">
@@ -487,27 +457,6 @@ class FC_Product_Admin {
                             </div>
                         </div>
 
-                        <!-- Plik cyfrowy (digital only) -->
-                        <div class="fc-form-card fc-section-digital" style="<?php echo $data['product_type'] !== 'digital' ? 'display:none;' : ''; ?>">
-                            <div class="fc-card-header"><?php fc_e( 'prod_downloadable_file' ); ?></div>
-                            <div class="fc-card-body">
-                                <div class="fc-form-field">
-                                    <label><?php fc_e( 'prod_file' ); ?></label>
-                                    <div class="fc-digital-file-wrap">
-                                        <input type="text" name="fc_digital_file" id="fc_digital_file" value="<?php echo esc_attr( $data['digital_file'] ); ?>" placeholder="<?php fc_e( 'prod_file_url_or_select_from_media_library' ); ?>" class="fc-input-file-url">
-                                        <button type="button" class="button" id="fc_choose_file"><?php fc_e( 'prod_select_file' ); ?></button>
-                                    </div>
-                                    <?php if ( $data['digital_file'] ) : ?>
-                                        <p class="fc-field-hint"><?php fc_e( 'prod_current_file' ); ?> <a href="<?php echo esc_url( $data['digital_file'] ); ?>" target="_blank"><?php echo esc_html( basename( $data['digital_file'] ) ); ?></a></p>
-                                    <?php endif; ?>
-                                </div>
-                                <div class="fc-form-field">
-                                    <label for="fc_download_limit"><?php fc_e( 'prod_download_limit' ); ?></label>
-                                    <input type="number" id="fc_download_limit" name="fc_download_limit" value="<?php echo esc_attr( $data['download_limit'] ); ?>" min="0" step="1" placeholder="<?php fc_e( 'coupon_no_limit' ); ?>" style="max-width:200px;">
-                                    <p class="fc-field-hint"><?php fc_e( 'prod_leave_empty_unlimited_downloads' ); ?></p>
-                                </div>
-                            </div>
-                        </div>
 
                         <!-- Magazyn (tylko simple) -->
                         <div class="fc-form-card fc-section-simple" style="<?php echo $data['product_type'] !== 'simple' ? 'display:none;' : ''; ?>">
@@ -572,43 +521,6 @@ class FC_Product_Admin {
                             </div>
                         </div>
 
-                        <!-- URL zewnętrzny (external only) -->
-                        <div class="fc-form-card fc-section-external" style="<?php echo $data['product_type'] !== 'external' ? 'display:none;' : ''; ?>">
-                            <div class="fc-card-header"><?php fc_e( 'prod_external_link' ); ?></div>
-                            <div class="fc-card-body">
-                                <div class="fc-form-field">
-                                    <label for="fc_external_url"><?php fc_e( 'prod_product_url' ); ?> <span class="required">*</span></label>
-                                    <input type="url" id="fc_external_url" name="fc_external_url" value="<?php echo esc_attr( $data['external_url'] ); ?>" placeholder="https://" class="fc-input-large">
-                                </div>
-                                <div class="fc-form-field">
-                                    <label for="fc_external_text"><?php fc_e( 'prod_button_text' ); ?></label>
-                                    <input type="text" id="fc_external_text" name="fc_external_text" value="<?php echo esc_attr( $data['external_text'] ); ?>" placeholder="<?php fc_e( 'prod_buy_in_external_store' ); ?>">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Produkty w zestawie (grouped only) -->
-                        <div class="fc-form-card fc-section-grouped" style="<?php echo $data['product_type'] !== 'grouped' ? 'display:none;' : ''; ?>">
-                            <div class="fc-card-header"><?php fc_e( 'prod_bundled_products' ); ?></div>
-                            <div class="fc-card-body">
-                                <p class="fc-field-hint"><?php fc_e( 'prod_select_products_included_in_the_bundle' ); ?></p>
-                                <?php
-                                $avail_grouped = get_posts( array(
-                                    'post_type'      => 'fc_product',
-                                    'post_status'    => array( 'fc_published', 'fc_draft', 'fc_hidden', 'fc_preorder' ),
-                                    'posts_per_page' => -1,
-                                    'exclude'        => $product_id ? array( $product_id ) : array(),
-                                ) );
-                                ?>
-                                <select name="fc_grouped_ids[]" multiple class="fc-select-products" style="width:100%;min-height:120px;">
-                                    <?php foreach ( $avail_grouped as $ap ) : ?>
-                                        <option value="<?php echo $ap->ID; ?>" <?php echo in_array( $ap->ID, $data['grouped_ids'] ) ? 'selected' : ''; ?>>
-                                            <?php echo esc_html( $ap->post_title ); ?> (#<?php echo $ap->ID; ?>)
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                        </div>
 
                         <!-- Specyfikacja techniczna -->
                         <div class="fc-form-card">
@@ -899,7 +811,7 @@ class FC_Product_Admin {
                                 <select name="fc_unit" id="fc_unit" class="fc-select-unit">
                                     <option value=""><?php fc_e( 'prod_select_unit' ); ?></option>
                                     <?php foreach ( $all_units as $unit ) : ?>
-                                        <option value="<?php echo esc_attr( $unit ); ?>" <?php selected( $data['unit'], $unit ); ?>><?php echo esc_html( $unit ); ?></option>
+                                        <option value="<?php echo esc_attr( $unit ); ?>" <?php selected( $data['unit'], $unit ); ?>><?php echo esc_html( FC_Units_Admin::label( $unit ) ); ?></option>
                                     <?php endforeach; ?>
                                 </select>
                                 <a href="#" class="fc-add-cat-toggle" id="fc_add_unit_toggle" role="button" aria-expanded="false"><span class="dashicons dashicons-plus-alt2" aria-hidden="true"></span> <?php fc_e( 'prod_add_unit' ); ?></a>
@@ -986,7 +898,7 @@ class FC_Product_Admin {
                         </div>
 
                         <!-- Klasa wysyłkowa -->
-                        <div class="fc-form-card fc-section-simple fc-section-variable fc-section-grouped" style="<?php echo in_array( $data['product_type'], array( 'digital', 'external' ) ) ? 'display:none;' : ''; ?>">
+                        <div class="fc-form-card fc-section-simple fc-section-variable">
                             <div class="fc-card-header"><?php fc_e( 'pt_shipping_class' ); ?></div>
                             <div class="fc-card-body">
                                 <?php
@@ -1133,7 +1045,7 @@ class FC_Product_Admin {
 
         // Typ produktu
         $product_type = isset( $_POST['fc_product_type'] ) ? sanitize_text_field( $_POST['fc_product_type'] ) : 'simple';
-        if ( ! in_array( $product_type, array( 'simple', 'variable', 'digital', 'external', 'grouped' ) ) ) $product_type = 'simple';
+        if ( ! in_array( $product_type, array( 'simple', 'variable' ) ) ) $product_type = 'simple';
         update_post_meta( $product_id, '_fc_product_type', $product_type );
 
         // Meta
@@ -1299,18 +1211,6 @@ class FC_Product_Admin {
             delete_post_meta( $product_id, '_fc_attributes' );
         }
 
-        // Produkt cyfrowy
-        if ( $product_type === 'digital' ) {
-            update_post_meta( $product_id, '_fc_digital_file', esc_url_raw( $_POST['fc_digital_file'] ?? '' ) );
-            update_post_meta( $product_id, '_fc_download_limit', sanitize_text_field( $_POST['fc_download_limit'] ?? '' ) );
-            // Cyfrowy nie ma fizycznego stanu — zawsze w magazynie
-            update_post_meta( $product_id, '_fc_stock_status', 'instock' );
-            update_post_meta( $product_id, '_fc_weight', '' );
-        } else {
-            delete_post_meta( $product_id, '_fc_digital_file' );
-            delete_post_meta( $product_id, '_fc_download_limit' );
-        }
-
         // Thumbnail
         if ( ! empty( $_POST['product_thumbnail'] ) ) {
             set_post_thumbnail( $product_id, absint( $_POST['product_thumbnail'] ) );
@@ -1356,24 +1256,6 @@ class FC_Product_Admin {
         // Klasa podatkowa (K2)
         if ( isset( $_POST['fc_tax_class'] ) ) {
             update_post_meta( $product_id, '_fc_tax_class', sanitize_text_field( $_POST['fc_tax_class'] ) );
-        }
-
-        // Produkt zewnętrzny (K5)
-        if ( $product_type === 'external' ) {
-            update_post_meta( $product_id, '_fc_external_url', esc_url_raw( $_POST['fc_external_url'] ?? '' ) );
-            update_post_meta( $product_id, '_fc_external_text', sanitize_text_field( $_POST['fc_external_text'] ?? '' ) );
-            update_post_meta( $product_id, '_fc_stock_status', 'instock' );
-        } else {
-            delete_post_meta( $product_id, '_fc_external_url' );
-            delete_post_meta( $product_id, '_fc_external_text' );
-        }
-
-        // Produkty w zestawie (W1: grouped)
-        if ( $product_type === 'grouped' ) {
-            $grouped_ids = isset( $_POST['fc_grouped_ids'] ) && is_array( $_POST['fc_grouped_ids'] ) ? array_map( 'absint', $_POST['fc_grouped_ids'] ) : array();
-            update_post_meta( $product_id, '_fc_grouped_ids', $grouped_ids );
-        } else {
-            delete_post_meta( $product_id, '_fc_grouped_ids' );
         }
 
         // Min/Max ilość (W4)
@@ -1699,8 +1581,7 @@ class FC_Product_Admin {
             wp_send_json_error( fc__( 'empty_unit_name' ) );
         }
 
-        $units = get_option( 'fc_product_units', array( 'szt.', 'kg', 'g', 'l', 'ml', 'm', 'cm', 'm²', 'm³', 'opak.', 'kpl.' ) );
-        if ( ! is_array( $units ) ) $units = array();
+        $units = FC_Units_Admin::get_all();
 
         // Sprawdź czy już istnieje
         if ( in_array( $name, $units, true ) ) {
@@ -1711,7 +1592,7 @@ class FC_Product_Admin {
         sort( $units );
         update_option( 'fc_product_units', $units );
 
-        wp_send_json_success( array( 'name' => $name ) );
+        wp_send_json_success( array( 'name' => $name, 'label' => FC_Units_Admin::label( $name ) ) );
     }
 
     /* ================================================================

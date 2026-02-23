@@ -9,7 +9,6 @@ class FC_Account {
     public static function init() {
         add_shortcode( 'fc_account', array( __CLASS__, 'render' ) );
         add_action( 'wp_ajax_fc_save_account', array( __CLASS__, 'save_account' ) );
-        add_action( 'init', array( __CLASS__, 'handle_download' ) );
         add_action( 'init', array( __CLASS__, 'handle_password_reset' ) );
         add_filter( 'the_title', array( __CLASS__, 'filter_page_title' ), 10, 2 );
         add_filter( 'authenticate', array( __CLASS__, 'block_pending_user' ), 99, 3 );
@@ -55,7 +54,7 @@ class FC_Account {
         }
 
         $tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'dashboard';
-        $valid_tabs = array( 'dashboard', 'orders', 'downloads', 'reviews', 'edit' );
+        $valid_tabs = array( 'dashboard', 'orders', 'reviews', 'edit' );
         $valid_tabs = apply_filters( 'fc_account_valid_tabs', $valid_tabs );
         if ( ! in_array( $tab, $valid_tabs ) ) $tab = 'dashboard';
 
@@ -69,9 +68,6 @@ class FC_Account {
                 switch ( $tab ) {
                     case 'orders':
                         self::render_orders();
-                        break;
-                    case 'downloads':
-                        self::render_downloads();
                         break;
                     case 'reviews':
                         self::render_reviews();
@@ -138,7 +134,6 @@ class FC_Account {
         $tabs = array(
             'dashboard' => array( 'label' => fc__( 'dashboard' ), 'icon' => 'dashicons-dashboard' ),
             'orders'    => array( 'label' => fc__( 'orders' ), 'icon' => 'dashicons-list-view' ),
-            'downloads' => array( 'label' => fc__( 'downloads' ), 'icon' => 'dashicons-download' ),
             'reviews'   => array( 'label' => fc__( 'my_reviews' ), 'icon' => 'dashicons-star-filled' ),
             'edit'      => array( 'label' => fc__( 'edit_details' ), 'icon' => 'dashicons-admin-users' ),
         );
@@ -192,13 +187,6 @@ class FC_Account {
                 ?>
                 <span class="fc-stat-number"><?php echo fc_format_price( $total_spent ); ?></span>
                 <span class="fc-stat-label"><?php fc_e( 'total_spent' ); ?></span>
-            </div>
-            <div class="fc-stat-box">
-                <?php
-                $downloads = self::get_user_downloads( $orders );
-                ?>
-                <span class="fc-stat-number"><?php echo count( $downloads ); ?></span>
-                <span class="fc-stat-label"><?php fc_e( 'downloads' ); ?></span>
             </div>
             <div class="fc-stat-box">
                 <?php
@@ -443,7 +431,7 @@ class FC_Account {
                     <?php foreach ( $items as $item ) :
                         $item_unit = '';
                         if ( FC_Units_Admin::is_visible( 'account' ) && ! empty( $item['product_id'] ) ) {
-                            $item_unit = get_post_meta( $item['product_id'], '_fc_unit', true ) ?: FC_Units_Admin::get_default();
+                            $item_unit = FC_Units_Admin::label( get_post_meta( $item['product_id'], '_fc_unit', true ) ?: FC_Units_Admin::get_default() );
                         }
                     ?>
                         <tr>
@@ -504,52 +492,6 @@ class FC_Account {
                 </tfoot>
             </table>
         <?php endif; ?>
-        <?php
-    }
-
-    /**
-     * Zakładka pliki do pobrania
-     */
-    private static function render_downloads() {
-        $downloads = self::get_user_downloads();
-        ?>
-        <h2><?php fc_e( 'downloads' ); ?></h2>
-        <?php
-
-        if ( empty( $downloads ) ) {
-            echo '<p class="fc-account-empty">' . fc__( 'no_downloads' ) . '</p>';
-            return;
-        }
-        ?>
-        <table class="fc-account-table">
-            <thead>
-                <tr>
-                    <th><?php fc_e( 'product' ); ?></th>
-                    <th><?php fc_e( 'order' ); ?></th>
-                    <th><?php fc_e( 'date' ); ?></th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ( $downloads as $dl ) : ?>
-                    <tr>
-                        <td data-label="<?php echo esc_attr( fc__( 'product' ) ); ?>">
-                            <a href="<?php echo esc_url( get_permalink( $dl['product_id'] ) ); ?>">
-                                <?php echo esc_html( $dl['product_name'] ); ?>
-                            </a>
-                        </td>
-                        <td data-label="<?php echo esc_attr( fc__( 'order' ) ); ?>"><?php echo esc_html( $dl['order_number'] ); ?></td>
-                        <td data-label="<?php echo esc_attr( fc__( 'date' ) ); ?>"><?php echo esc_html( $dl['date'] ); ?></td>
-                        <td data-label="">
-                            <a href="<?php echo esc_url( $dl['download_url'] ); ?>" class="fc-btn fc-btn-sm">
-                                <span class="dashicons dashicons-download" style="font-size:14px;width:14px;height:14px;vertical-align:middle;margin-right:4px;"></span>
-                                <?php fc_e( 'download' ); ?>
-                            </a>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
         <?php
     }
 
@@ -1392,36 +1334,6 @@ class FC_Account {
     }
 
     /**
-     * Obsługa pobierania pliku cyfrowego
-     */
-    public static function handle_download() {
-        if ( ! isset( $_GET['fc_download'] ) || ! is_user_logged_in() ) return;
-
-        $product_id = absint( $_GET['fc_download'] );
-        $order_id   = absint( $_GET['order_id'] ?? 0 );
-        $user_id    = get_current_user_id();
-
-        if ( ! $order_id || ! $product_id ) return;
-
-        // Sprawdź czy zamówienie należy do użytkownika
-        $order_user = get_post_meta( $order_id, '_fc_customer_id', true );
-        if ( intval( $order_user ) !== $user_id ) return;
-
-        // Sprawdź status zamówienia
-        $status = get_post_meta( $order_id, '_fc_order_status', true );
-        if ( ! in_array( $status, array( 'processing', 'completed' ) ) ) return;
-
-        // Pobierz URL pliku
-        $file_url = get_post_meta( $product_id, '_fc_digital_file', true );
-        if ( ! $file_url ) return;
-
-        // Redirect do pliku
-        $safe_url = wp_validate_redirect( $file_url, home_url() );
-        wp_redirect( $safe_url );
-        exit;
-    }
-
-    /**
      * Helper: zamówienia użytkownika
      */
     private static function get_user_orders() {
@@ -1435,69 +1347,4 @@ class FC_Account {
         ) );
     }
 
-    /**
-     * Helper: pliki do pobrania użytkownika
-     */
-    private static function get_user_downloads( $orders = null ) {
-        if ( $orders === null ) {
-            $orders = self::get_user_orders();
-        }
-        $downloads = array();
-
-        if ( empty( $orders ) ) return $downloads;
-
-        // Preload order meta
-        $order_ids = wp_list_pluck( $orders, 'ID' );
-        update_postmeta_cache( $order_ids );
-
-        // Collect product IDs to preload their meta too
-        $product_ids = array();
-        foreach ( $orders as $order ) {
-            $items = get_post_meta( $order->ID, '_fc_order_items', true );
-            if ( is_array( $items ) ) {
-                foreach ( $items as $item ) {
-                    if ( ! empty( $item['product_id'] ) ) {
-                        $product_ids[] = (int) $item['product_id'];
-                    }
-                }
-            }
-        }
-        if ( ! empty( $product_ids ) ) {
-            update_postmeta_cache( array_unique( $product_ids ) );
-        }
-
-        foreach ( $orders as $order ) {
-            $status = get_post_meta( $order->ID, '_fc_order_status', true );
-            if ( ! in_array( $status, array( 'processing', 'completed' ) ) ) continue;
-
-            $items  = get_post_meta( $order->ID, '_fc_order_items', true );
-            $number = get_post_meta( $order->ID, '_fc_order_number', true ) ?: $order->post_title;
-            $date   = get_post_meta( $order->ID, '_fc_order_date', true );
-
-            if ( ! is_array( $items ) ) continue;
-
-            foreach ( $items as $item ) {
-                $type = get_post_meta( $item['product_id'], '_fc_product_type', true );
-                if ( $type !== 'digital' ) continue;
-
-                $file = get_post_meta( $item['product_id'], '_fc_digital_file', true );
-                if ( ! $file ) continue;
-
-                $download_url = add_query_arg( array(
-                    'fc_download' => $item['product_id'],
-                    'order_id'    => $order->ID,
-                ), home_url( '/' ) );
-
-                $downloads[] = array(
-                    'product_id'   => $item['product_id'],
-                    'product_name' => $item['product_name'],
-                    'order_number' => $number,
-                    'date'         => $date ? date_i18n( 'j M Y', strtotime( $date ) ) : '—',
-                    'download_url' => $download_url,
-                );
-            }
-        }
-
-        return $downloads;
-    }
 }

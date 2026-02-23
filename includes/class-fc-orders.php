@@ -42,9 +42,7 @@ class FC_Orders {
         add_filter( 'views_edit-fc_order', array( __CLASS__, 'status_views' ) );
         add_action( 'pre_get_posts', array( __CLASS__, 'filter_by_status' ) );
         add_action( 'restrict_manage_posts', array( __CLASS__, 'render_order_filters' ) );
-        add_action( 'manage_posts_extra_tablenav', array( __CLASS__, 'render_export_button' ) );
         add_filter( 'posts_clauses', array( __CLASS__, 'search_orders_clauses' ), 10, 2 );
-        add_action( 'wp_ajax_fc_export_orders_csv', array( __CLASS__, 'export_csv' ) );
         add_action( 'admin_menu', array( __CLASS__, 'menu_order_count' ) );
     }
 
@@ -232,7 +230,7 @@ class FC_Orders {
                 <?php foreach ( $items as $item ) :
                     $unit_label = '';
                     if ( $show_units && ! empty( $item['product_id'] ) ) {
-                        $unit_label = get_post_meta( $item['product_id'], '_fc_unit', true ) ?: FC_Units_Admin::get_default();
+                        $unit_label = FC_Units_Admin::label( get_post_meta( $item['product_id'], '_fc_unit', true ) ?: FC_Units_Admin::get_default() );
                     }
                 ?>
                     <tr>
@@ -647,20 +645,6 @@ class FC_Orders {
     }
 
     /**
-     * Render Export CSV button (after WP Filter button)
-     */
-    public static function render_export_button( $which ) {
-        if ( $which !== 'top' ) return;
-        $screen = get_current_screen();
-        if ( ! $screen || $screen->id !== 'edit-fc_order' ) return;
-        ?>
-        <button type="button" class="button fc-export-csv-btn" style="margin-left:4px;">
-            <?php fc_e( 'admin_export_csv' ); ?>
-        </button>
-        <?php
-    }
-
-    /**
      * Modify query clauses to search orders by customer name, email, or order number
      */
     public static function search_orders_clauses( $clauses, $query ) {
@@ -703,136 +687,6 @@ class FC_Orders {
         }
 
         return $clauses;
-    }
-
-    /**
-     * CSV export of orders (AJAX)
-     */
-    public static function export_csv() {
-        check_ajax_referer( 'fc_admin_nonce', 'nonce' );
-        if ( ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( fc__( 'forbidden' ) );
-        }
-
-        global $wpdb;
-
-        // Build query conditions matching current filters
-        $conditions = array( "p.post_type = 'fc_order'" );
-        $joins      = array();
-        $params     = array();
-
-        // Status filter
-        $status = isset( $_POST['fc_status'] ) ? sanitize_text_field( $_POST['fc_status'] ) : '';
-        if ( $status !== '' && in_array( $status, self::$status_keys, true ) ) {
-            $joins[]      = "INNER JOIN {$wpdb->postmeta} pm_status ON (p.ID = pm_status.post_id AND pm_status.meta_key = '_fc_order_status')";
-            $conditions[] = 'pm_status.meta_value = %s';
-            $params[]     = $status;
-        }
-
-        // Search filter
-        $search = isset( $_POST['fc_search'] ) ? sanitize_text_field( $_POST['fc_search'] ) : '';
-        if ( $search !== '' ) {
-            $like         = '%' . $wpdb->esc_like( $search ) . '%';
-            $joins[]      = "LEFT JOIN {$wpdb->postmeta} pm_cust ON (p.ID = pm_cust.post_id AND pm_cust.meta_key = '_fc_customer')";
-            $conditions[] = '(p.post_title LIKE %s OR pm_cust.meta_value LIKE %s)';
-            $params[]     = $like;
-            $params[]     = $like;
-        }
-
-        // Date range
-        $date_from = isset( $_POST['fc_date_from'] ) ? sanitize_text_field( $_POST['fc_date_from'] ) : '';
-        $date_to   = isset( $_POST['fc_date_to'] ) ? sanitize_text_field( $_POST['fc_date_to'] ) : '';
-        if ( $date_from !== '' || $date_to !== '' ) {
-            $joins[] = "LEFT JOIN {$wpdb->postmeta} pm_date ON (p.ID = pm_date.post_id AND pm_date.meta_key = '_fc_order_date')";
-            if ( $date_from !== '' ) {
-                $conditions[] = 'pm_date.meta_value >= %s';
-                $params[]     = $date_from . ' 00:00:00';
-            }
-            if ( $date_to !== '' ) {
-                $conditions[] = 'pm_date.meta_value <= %s';
-                $params[]     = $date_to . ' 23:59:59';
-            }
-        }
-
-        $join_sql  = implode( ' ', $joins );
-        $where_sql = implode( ' AND ', $conditions );
-
-        $sql = "SELECT p.ID FROM {$wpdb->posts} p {$join_sql} WHERE {$where_sql} ORDER BY p.ID DESC LIMIT 5000";
-        if ( ! empty( $params ) ) {
-            $sql = $wpdb->prepare( $sql, $params );
-        }
-
-        $order_ids = $wpdb->get_col( $sql );
-
-        // Build CSV
-        $csv_header = array(
-            fc__( 'admin_csv_order_nr' ),
-            fc__( 'admin_csv_date' ),
-            fc__( 'admin_csv_status' ),
-            fc__( 'admin_csv_customer' ),
-            fc__( 'admin_csv_email' ),
-            fc__( 'admin_csv_phone' ),
-            fc__( 'admin_csv_address' ),
-            fc__( 'admin_csv_total' ),
-            fc__( 'admin_csv_payment' ),
-            fc__( 'admin_csv_products' ),
-        );
-
-        $rows = array();
-        if ( ! empty( $order_ids ) ) {
-            update_meta_cache( 'post', $order_ids );
-        }
-
-        $statuses = self::get_statuses();
-
-        foreach ( $order_ids as $oid ) {
-            $customer = get_post_meta( $oid, '_fc_customer', true );
-            $items    = get_post_meta( $oid, '_fc_order_items', true );
-            $total    = get_post_meta( $oid, '_fc_order_total', true );
-            $date     = get_post_meta( $oid, '_fc_order_date', true );
-            $st       = get_post_meta( $oid, '_fc_order_status', true );
-
-            $products_str = '';
-            if ( is_array( $items ) ) {
-                $parts = array();
-                foreach ( $items as $item ) {
-                    $name = $item['name'] ?? '';
-                    $qty  = $item['quantity'] ?? 1;
-                    $parts[] = $name . ' x' . $qty;
-                }
-                $products_str = implode( '; ', $parts );
-            }
-
-            $rows[] = array(
-                get_the_title( $oid ),
-                $date ?: '',
-                isset( $statuses[ $st ] ) ? $statuses[ $st ] : $st,
-                is_array( $customer ) ? trim( ( $customer['first_name'] ?? '' ) . ' ' . ( $customer['last_name'] ?? '' ) ) : '',
-                is_array( $customer ) ? ( $customer['email'] ?? '' ) : '',
-                is_array( $customer ) ? trim( ( $customer['phone_prefix'] ?? '' ) . ' ' . ( $customer['phone'] ?? '' ) ) : '',
-                is_array( $customer ) ? trim( ( $customer['address'] ?? '' ) . ', ' . ( $customer['postcode'] ?? '' ) . ' ' . ( $customer['city'] ?? '' ) ) : '',
-                $total ?: '0',
-                self::get_order_payment_label( $oid ),
-                $products_str,
-            );
-        }
-
-        // Generate CSV string
-        $handle = fopen( 'php://temp', 'r+' );
-        // BOM for Excel UTF-8 compatibility
-        fwrite( $handle, "\xEF\xBB\xBF" );
-        fputcsv( $handle, $csv_header, ';' );
-        foreach ( $rows as $row ) {
-            fputcsv( $handle, $row, ';' );
-        }
-        rewind( $handle );
-        $csv_content = stream_get_contents( $handle );
-        fclose( $handle );
-
-        wp_send_json_success( array(
-            'csv'      => base64_encode( $csv_content ),
-            'filename' => 'orders-' . wp_date( 'Y-m-d' ) . '.csv',
-        ) );
     }
 
     public static function bulk_actions( $actions ) {

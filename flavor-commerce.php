@@ -63,7 +63,6 @@ final class Flavor_Commerce {
         require_once FC_PLUGIN_DIR . 'includes/class-fc-user-profile.php';
         require_once FC_PLUGIN_DIR . 'includes/class-fc-invoices.php';
         require_once FC_PLUGIN_DIR . 'includes/class-fc-coupons.php';
-        require_once FC_PLUGIN_DIR . 'includes/class-fc-import-export.php';
         require_once FC_PLUGIN_DIR . 'includes/class-fc-wishlist.php';
         require_once FC_PLUGIN_DIR . 'includes/class-fc-frontend-features.php';
         require_once FC_PLUGIN_DIR . 'includes/class-fc-stripe.php';
@@ -112,7 +111,6 @@ final class Flavor_Commerce {
         FC_User_Profile::init();
         FC_Invoices::init();
         FC_Coupons::init();
-        FC_Import_Export::init();
         FC_Wishlist::init();
         FC_Frontend_Features::init();
         FC_Stripe::init();
@@ -157,6 +155,8 @@ final class Flavor_Commerce {
             'lista-zyczen' => array( 'title' => fc__( 'page_wishlist' ), 'content' => '[fc_wishlist]', 'option' => 'fc_page_wishlist' ),
             'porownanie' => array( 'title' => fc__( 'page_comparison' ), 'content' => '[fc_compare]', 'option' => 'fc_page_porownanie' ),
             'platnosc-nieudana' => array( 'title' => fc__( 'page_retry_payment' ), 'content' => '[fc_retry_payment]', 'option' => 'fc_page_platnosc_nieudana' ),
+            'o-nas'    => array( 'title' => fc__( 'page_about' ), 'content' => '', 'option' => 'fc_page_o-nas' ),
+            'kontakt'  => array( 'title' => fc__( 'page_contact' ), 'content' => '', 'option' => 'fc_page_kontakt', 'template' => 'template-contact.php' ),
         );
 
         foreach ( $pages as $slug => $page_data ) {
@@ -171,10 +171,19 @@ final class Flavor_Commerce {
                     'post_name'    => $slug,
                 ) );
                 update_option( $option_key, $page_id );
+                if ( ! empty( $page_data['template'] ) && $page_id && ! is_wp_error( $page_id ) ) {
+                    update_post_meta( $page_id, '_wp_page_template', $page_data['template'] );
+                }
             } else {
                 update_option( $option_key, $existing->ID );
+                if ( ! empty( $page_data['template'] ) ) {
+                    update_post_meta( $existing->ID, '_wp_page_template', $page_data['template'] );
+                }
             }
         }
+
+        // Seed default units of measure
+        FC_Units_Admin::seed_defaults();
     }
 
     public function deactivate() {
@@ -231,6 +240,8 @@ final class Flavor_Commerce {
             'fc_page_wishlist'          => array( 'title_key' => 'page_wishlist',       'content' => '[fc_wishlist]' ),
             'fc_page_porownanie'        => array( 'title_key' => 'page_comparison',    'content' => '[fc_compare]' ),
             'fc_page_platnosc_nieudana' => array( 'title_key' => 'page_retry_payment', 'content' => '[fc_retry_payment]' ),
+            'fc_page_o-nas'             => array( 'title_key' => 'page_about',          'content' => '' ),
+            'fc_page_kontakt'           => array( 'title_key' => 'page_contact',        'content' => '', 'template' => 'template-contact.php' ),
         );
 
         // Delete existing store pages (tracked by options).
@@ -268,6 +279,9 @@ final class Flavor_Commerce {
 
             if ( $page_id && ! is_wp_error( $page_id ) ) {
                 update_option( $option_key, $page_id );
+                if ( ! empty( $page_data['template'] ) ) {
+                    update_post_meta( $page_id, '_wp_page_template', $page_data['template'] );
+                }
             }
         }
 
@@ -311,6 +325,8 @@ final class Flavor_Commerce {
                 'fc_cart'     => 'page_cart',
                 'fc_wishlist' => 'page_wishlist',
                 'fc_compare'  => 'theme_compare',
+                'fc_about'    => 'page_about',
+                'fc_contact'  => 'page_contact',
             );
             foreach ( $menu_items as &$item ) {
                 $itype = $item['type'] ?? '';
@@ -350,6 +366,8 @@ final class Flavor_Commerce {
                 'fc_page_wishlist'          => 'page_state_wishlist',
                 'fc_page_porownanie'        => 'page_state_comparison',
                 'fc_page_platnosc_nieudana' => 'page_state_retry_payment',
+                'fc_page_o-nas'             => 'page_state_about',
+                'fc_page_kontakt'           => 'page_state_contact',
             );
             foreach ( $option_keys as $opt => $label_key ) {
                 $pid = (int) get_option( $opt, 0 );
@@ -638,7 +656,6 @@ final class Flavor_Commerce {
                     'media_add_to_gallery'      => fc__( 'main_add_photos_to_gallery' ),
                     'media_select_image_for'    => fc__( 'main_select_image_for' ),
                     'media_select_image'        => fc__( 'main_select_image' ),
-                    'media_select_download'     => fc__( 'main_select_file_for_download' ),
                     'media_select_brand_logo'   => fc__( 'main_select_brand_logo' ),
                     'media_use_as_logo'         => fc__( 'main_use_as_logo' ),
 
@@ -711,7 +728,6 @@ final class Flavor_Commerce {
                     // Save / general
                     'saved'                     => fc__( 'main_saved' ),
                     'save_error'                => fc__( 'main_an_error_occurred' ),
-                    'export_csv'                => fc__( 'admin_export_csv' ),
                     'close'                     => fc__( 'main_close' ),
                 ),
             ) );

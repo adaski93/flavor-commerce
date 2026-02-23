@@ -106,7 +106,7 @@ class FC_Frontend_Features {
                         <span><?php echo fc_format_price( $price ); ?></span>
                     <?php endif; ?>
                     <?php if ( FC_Units_Admin::is_visible( 'product' ) ) : ?>
-                        <span class="fc-price-unit">/ <?php echo esc_html( $unit ); ?></span>
+                        <span class="fc-price-unit">/ <?php echo esc_html( FC_Units_Admin::label( $unit ) ); ?></span>
                     <?php endif; ?>
                 </div>
 
@@ -127,10 +127,7 @@ class FC_Frontend_Features {
                 <?php endif; ?>
 
                 <div class="fc-qv-actions" style="margin-top:15px;display:flex;gap:10px;align-items:center;">
-                    <?php if ( $product_type === 'external' ) : ?>
-                        <?php $ext_url = get_post_meta( $product_id, '_fc_external_url', true ); ?>
-                        <a href="<?php echo esc_url( $ext_url ); ?>" class="fc-btn" target="_blank" rel="noopener"><?php echo esc_html( get_post_meta( $product_id, '_fc_external_text', true ) ?: fc__( 'buy_now' ) ); ?></a>
-                    <?php elseif ( $product_type === 'variable' ) : ?>
+                    <?php if ( $product_type === 'variable' ) : ?>
                         <a href="<?php echo esc_url( get_permalink( $product_id ) ); ?>" class="fc-btn"><?php fc_e( 'choose_variants' ); ?></a>
                     <?php elseif ( $stock_status !== 'outofstock' ) : ?>
                         <button class="fc-btn fc-add-to-cart" data-product-id="<?php echo esc_attr( $product_id ); ?>"><?php fc_e( 'add_to_cart' ); ?></button>

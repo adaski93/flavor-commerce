@@ -75,8 +75,6 @@ return array(
     'unavailable'                  => 'Niedostępny',
     'add'                          => 'Dodaj',
     'buy_now'                      => 'Kup teraz',
-    'buy_external'                 => 'Kup w sklepie zewnętrznym',
-    'buy_and_download'             => 'Kup i pobierz',
     'details'                      => 'Szczegóły',
 
     /* ── Cart ──────────────────────────────────────────────── */
@@ -182,13 +180,12 @@ return array(
     'admin_panel'                  => 'Panel administratora',
     'dashboard'                    => 'Pulpit',
     'orders'                       => 'Zamówienia',
-    'downloads'                    => 'Pliki do pobrania',
     'my_reviews'                   => 'Moje opinie',
     'edit_details'                 => 'Edycja danych',
     'logout'                       => 'Wyloguj',
     'total_spent'                  => 'Wydano łącznie',
     'reviews_stat'                 => 'Opinie',
-    'dashboard_description'        => 'Z poziomu panelu konta możesz przeglądać zamówienia, pobierać pliki i edytować swoje dane.',
+    'dashboard_description'        => 'Z poziomu panelu konta możesz przeglądać zamówienia i edytować swoje dane.',
     'recent_orders'                => 'Ostatnie zamówienia',
 
     /* ── Account – orders ──────────────────────────────────── */
@@ -207,10 +204,6 @@ return array(
     'download_invoice'             => 'Pobierz fakturę %s',
     'order_items'                  => 'Pozycje zamówienia',
 
-    /* ── Account – downloads ───────────────────────────────── */
-    'no_downloads'                 => 'Nie masz żadnych plików do pobrania.',
-    'order'                        => 'Zamówienie',
-    'download'                     => 'Pobierz',
 
     /* ── Account – reviews ─────────────────────────────────── */
     'no_reviews'                   => 'Nie dodałeś jeszcze żadnych opinii.',
@@ -346,11 +339,8 @@ return array(
 
     /* ── Single product ────────────────────────────────────── */
     'category_label'               => 'Kategoria:',
-    'grouped_products'             => 'Produkty w zestawie:',
     'min_order_quantity'           => 'Minimalna ilość zamówienia: %d',
     'in_comparator'                => 'W porównywarce',
-    'type_label'                   => 'Typ:',
-    'digital_product'              => 'Produkt cyfrowy',
     'sku_label'                    => 'SKU:',
     'description_tab'              => 'Opis',
     'specifications_tab'           => 'Specyfikacja',
@@ -375,6 +365,8 @@ return array(
     'page_wishlist'                => 'Lista życzeń',
     'page_comparison'              => 'Porównanie produktów',
     'page_retry_payment'           => 'Płatność nieudana',
+    'page_about'                   => 'O nas',
+    'page_contact'                 => 'Kontakt',
 
     /* ── Order statuses (shared frontend/admin) ────────────── */
     'status_pending'               => 'Oczekuje',
@@ -528,21 +520,6 @@ return array(
     'retry_order_already_processed' => 'To zamówienie zostało już przetworzone.',
     'retry_order_expired'          => 'Czas na opłacenie tego zamówienia minął. Zamówienie zostało anulowane.',
 
-    /* ── Admin: Order Filters & CSV ─────────────────────────── */
-    'admin_order_search_placeholder' => 'Szukaj zamówień…',
-    'admin_date_from'              => 'Data od',
-    'admin_date_to'                => 'Data do',
-    'admin_export_csv'             => 'Eksport CSV',
-    'admin_csv_order_nr'           => 'Nr zamówienia',
-    'admin_csv_date'               => 'Data',
-    'admin_csv_status'             => 'Status',
-    'admin_csv_customer'           => 'Klient',
-    'admin_csv_email'              => 'E-mail',
-    'admin_csv_phone'              => 'Telefon',
-    'admin_csv_address'            => 'Adres',
-    'admin_csv_total'              => 'Suma',
-    'admin_csv_payment'            => 'Płatność',
-    'admin_csv_products'           => 'Produkty',
 
     // ── AJAX / error messages ──
     'access_denied'                => 'Brak uprawnień.',
@@ -561,6 +538,20 @@ return array(
     'empty_name'                   => 'Pusta nazwa.',
     'empty_unit_name'              => 'Pusta nazwa jednostki.',
     'unit_already_exists'          => 'Jednostka już istnieje.',
+
+    // ── Unit slug labels ──
+    'unit_pcs'                     => 'szt.',
+    'unit_kg'                      => 'kg',
+    'unit_g'                       => 'g',
+    'unit_l'                       => 'l',
+    'unit_ml'                      => 'ml',
+    'unit_m'                       => 'm',
+    'unit_cm'                      => 'cm',
+    'unit_sqm'                     => 'm²',
+    'unit_cbm'                     => 'm³',
+    'unit_pack'                    => 'opak.',
+    'unit_set'                     => 'kpl.',
+
     'no_results'                   => 'Brak wyników',
 
     // ── Coupon messages ──
@@ -582,4 +573,36 @@ return array(
 
     // ── Theme: Icon fallbacks ──
     'theme_compare'                => 'Porównywarka',
+
+    // ── Strona kontaktowa ──
+    'contact_form_title'           => 'Napisz do nas',
+    'contact_label_name'           => 'Imię i nazwisko',
+    'contact_label_email'          => 'Adres e-mail',
+    'contact_label_subject'        => 'Temat',
+    'contact_label_message'        => 'Wiadomość',
+    'contact_btn_send'             => 'Wyślij wiadomość',
+    'contact_success'              => 'Wiadomość została wysłana pomyślnie. Odpowiemy najszybciej jak to możliwe!',
+    'contact_error_required'       => 'Proszę wypełnić wszystkie wymagane pola.',
+    'contact_error_email'          => 'Proszę podać prawidłowy adres e-mail.',
+    'contact_error_send'           => 'Wystąpił błąd podczas wysyłania wiadomości. Spróbuj ponownie później.',
+    'contact_new_message'          => 'Nowa wiadomość z formularza kontaktowego',
+    'contact_mail_name'            => 'Imię i nazwisko',
+    'contact_mail_email'           => 'E-mail',
+    'contact_mail_subject'         => 'Temat',
+    'contact_mail_message'         => 'Wiadomość',
+    'contact_info_title'           => 'Nasza firma',
+    'contact_reach_us'             => 'Skontaktuj się',
+    'contact_hours_title'          => 'Godziny otwarcia',
+    'contact_hours_from'           => 'od',
+    'contact_hours_to'             => 'do',
+    'day_mon'                      => 'Pon',
+    'day_tue'                      => 'Wt',
+    'day_wed'                      => 'Śr',
+    'day_thu'                      => 'Czw',
+    'day_fri'                      => 'Pt',
+    'day_sat'                      => 'Sob',
+    'day_sun'                      => 'Ndz',
+    'contact_social_title'         => 'Obserwuj nas',
+    'contact_nip_label'            => 'NIP',
+    'contact_crn_label'            => 'KRS / REGON',
 );

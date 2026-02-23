@@ -35,8 +35,6 @@ while ( have_posts() ) : the_post();
     if ( ! is_array( $upsell_ids ) ) $upsell_ids = array();
     $crosssell_ids   = get_post_meta( $product_id, '_fc_crosssell_ids', true );
     if ( ! is_array( $crosssell_ids ) ) $crosssell_ids = array();
-    $external_url    = get_post_meta( $product_id, '_fc_external_url', true );
-    $external_text   = get_post_meta( $product_id, '_fc_external_text', true );
     $purchase_note   = get_post_meta( $product_id, '_fc_purchase_note', true );
     $min_quantity    = get_post_meta( $product_id, '_fc_min_quantity', true );
     $max_quantity    = get_post_meta( $product_id, '_fc_max_quantity', true );
@@ -266,7 +264,7 @@ while ( have_posts() ) : the_post();
                     <span><?php echo fc_format_price( $price, $product_id ); ?></span>
                 <?php endif; ?>
                 <?php if ( ! empty( $unit ) && FC_Units_Admin::is_visible( 'product' ) ) : ?>
-                    <span class="fc-price-unit">/ <?php echo esc_html( $unit ); ?></span>
+                    <span class="fc-price-unit">/ <?php echo esc_html( FC_Units_Admin::label( $unit ) ); ?></span>
                 <?php endif; ?>
             </div>
 
@@ -275,19 +273,17 @@ while ( have_posts() ) : the_post();
             <?php endif; ?>
 
             <!-- Stan magazynowy -->
-            <?php if ( $product_type !== 'digital' ) : ?>
-            <div class="fc-stock-info" data-unit="<?php echo esc_attr( $unit ); ?>">
+            <div class="fc-stock-info" data-unit="<?php echo esc_attr( FC_Units_Admin::label( $unit ) ); ?>">
                 <?php if ( $stock_status === 'outofstock' ) : ?>
                     <span class="fc-stock-badge out"><?php fc_e( 'out_of_stock_badge' ); ?></span>
                     <?php if ( get_option( 'fc_enable_stock_notify', '1' ) && class_exists( 'FC_Frontend_Features' ) ) FC_Frontend_Features::render_stock_notify_button( $product_id ); ?>
                 <?php else : ?>
                     <span class="fc-stock-badge in"><?php fc_e( 'in_stock_badge' ); ?></span>
                     <?php if ( $manage_stock === '1' && $stock !== '' ) : ?>
-                        <span class="fc-stock-qty">(<?php echo intval( $stock ); ?> <?php echo esc_html( $unit ); ?>)</span>
+                        <span class="fc-stock-qty">(<?php echo intval( $stock ); ?> <?php echo esc_html( FC_Units_Admin::label( $unit ) ); ?>)</span>
                     <?php endif; ?>
                 <?php endif; ?>
             </div>
-            <?php endif; ?>
 
             <!-- Warianty atrybutowe -->
             <?php if ( $product_type === 'variable' && ! empty( $active_variants ) && ! empty( $attributes ) ) : ?>
@@ -370,46 +366,7 @@ while ( have_posts() ) : the_post();
             <?php endif; ?>
 
             <!-- Dodaj do koszyka -->
-            <?php if ( $product_type === 'external' && $external_url ) : ?>
-                <div class="fc-add-to-cart-form">
-                    <a href="<?php echo esc_url( $external_url ); ?>" class="fc-btn fc-btn-large" target="_blank" rel="noopener noreferrer">
-                        <span class="dashicons dashicons-admin-links fc-link-icon"></span>
-                        <?php echo esc_html( $external_text ?: fc__( 'buy_external' ) ); ?>
-                    </a>
-                </div>
-            <?php elseif ( $product_type === 'digital' ) : ?>
-                <div class="fc-add-to-cart-form">
-                    <button class="fc-btn fc-btn-large fc-add-to-cart-single" data-product-id="<?php echo esc_attr( $product_id ); ?>">
-                        <span class="dashicons dashicons-download fc-link-icon"></span>
-                        <?php fc_e( 'buy_and_download' ); ?>
-                    </button>
-                </div>
-            <?php elseif ( $product_type === 'grouped' ) : ?>
-                <?php
-                $grouped_ids = get_post_meta( $product_id, '_fc_grouped_ids', true );
-                if ( is_array( $grouped_ids ) && ! empty( $grouped_ids ) ) :
-                ?>
-                <div class="fc-grouped-products">
-                    <h4><?php fc_e( 'grouped_products' ); ?></h4>
-                    <?php foreach ( $grouped_ids as $gid ) :
-                        $gp = get_post( $gid );
-                        if ( ! $gp ) continue;
-                        $g_price = get_post_meta( $gid, '_fc_effective_price', true ) ?: get_post_meta( $gid, '_fc_price', true );
-                    ?>
-                        <div class="fc-grouped-item">
-                            <?php if ( has_post_thumbnail( $gid ) ) : ?>
-                                <a href="<?php echo get_permalink( $gid ); ?>"><?php echo get_the_post_thumbnail( $gid, 'thumbnail', array( 'class' => 'fc-grouped-item-thumb' ) ); ?></a>
-                            <?php endif; ?>
-                            <div class="fc-grouped-item-info">
-                                <a href="<?php echo get_permalink( $gid ); ?>"><?php echo esc_html( $gp->post_title ); ?></a>
-                                <?php if ( $g_price ) : ?><span class="fc-grouped-item-price"><?php echo fc_format_price( $g_price ); ?></span><?php endif; ?>
-                            </div>
-                            <button class="fc-btn fc-btn-sm fc-add-to-cart" data-product-id="<?php echo esc_attr( $gid ); ?>"><?php fc_e( 'add' ); ?></button>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-                <?php endif; ?>
-            <?php elseif ( $stock_status !== 'outofstock' || $product_type === 'variable' ) : ?>
+            <?php if ( $stock_status !== 'outofstock' || $product_type === 'variable' ) : ?>
                 <div class="fc-add-to-cart-form">
                     <div class="fc-qty-wrapper"<?php echo ( $stock_status === 'outofstock' && $product_type === 'variable' ) ? ' style="display:none;"' : ''; ?>>
                         <button type="button" class="fc-qty-btn fc-qty-minus">−</button>
@@ -464,9 +421,6 @@ while ( have_posts() ) : the_post();
 
             <!-- Meta -->
             <div class="fc-product-meta-info">
-                <?php if ( $product_type === 'digital' ) : ?>
-                    <p><span><?php fc_e( 'type_label' ); ?></span> <?php fc_e( 'digital_product' ); ?></p>
-                <?php endif; ?>
                 <?php if ( $sku ) : ?>
                     <p><span><?php fc_e( 'sku_label' ); ?></span> <?php echo esc_html( $sku ); ?></p>
                 <?php endif; ?>
@@ -524,7 +478,7 @@ while ( have_posts() ) : the_post();
 
     <?php
     // Notatka zakupowa (W3) — wyświetlana jako info
-    if ( get_option( 'fc_enable_purchase_note', '1' ) && $purchase_note && $stock_status !== 'outofstock' && $product_type !== 'external' ) : ?>
+    if ( get_option( 'fc_enable_purchase_note', '1' ) && $purchase_note && $stock_status !== 'outofstock' ) : ?>
         <div class="fc-purchase-note">
             <strong><?php fc_e( 'purchase_note_heading' ); ?></strong>
             <?php echo wp_kses_post( wpautop( $purchase_note ) ); ?>

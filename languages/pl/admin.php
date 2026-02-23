@@ -1167,6 +1167,7 @@ return array(
     'cust_contact_map_dark'        => 'Ciemny styl mapy',
 
     // ── Social media (Customizer) ──
+    'cust_contact_social_hint'     => 'Podaj adresy URL swoich profili społecznościowych.',
     'cust_social'              => 'Social media',
     'cust_social_desc'         => 'Dodaj linki do swoich profili w mediach społecznościowych. Pojawią się na stronie kontaktowej.',
 

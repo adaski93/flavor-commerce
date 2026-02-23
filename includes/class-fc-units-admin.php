@@ -9,7 +9,21 @@ class FC_Units_Admin {
 
     const OPTION_KEY = 'fc_product_units';
 
-    const DEFAULTS = array( 'szt.', 'kg', 'g', 'l', 'ml', 'm', 'cm', 'm²', 'm³', 'opak.', 'kpl.' );
+    /**
+     * Domyślne slugi jednostek (tłumaczone kluczami unit_<slug>)
+     */
+    const DEFAULTS = array( 'pcs', 'kg', 'g', 'l', 'ml', 'm', 'cm', 'sqm', 'cbm', 'pack', 'set' );
+
+    /**
+     * Mapa migracji ze starych zlokalizowanych nazw na slugi
+     */
+    const LEGACY_MAP = array(
+        'szt.'  => 'pcs',
+        'm²'    => 'sqm',
+        'm³'    => 'cbm',
+        'opak.' => 'pack',
+        'kpl.'  => 'set',
+    );
 
     public static function init() {
         add_action( 'admin_menu', array( __CLASS__, 'add_menu_page' ) );
@@ -19,13 +33,77 @@ class FC_Units_Admin {
         add_action( 'admin_post_fc_save_unit_visibility', array( __CLASS__, 'handle_save_visibility' ) );
         add_action( 'admin_post_fc_edit_unit', array( __CLASS__, 'handle_edit' ) );
         add_action( 'admin_post_fc_bulk_units', array( __CLASS__, 'handle_bulk' ) );
+        self::maybe_migrate();
     }
 
     /**
-     * Pobierz domyślną jednostkę
+     * Migracja starych zlokalizowanych nazw na slugi (jednorazowo)
+     */
+    public static function maybe_migrate() {
+        if ( get_option( 'fc_units_migrated_v2' ) ) return;
+
+        // Domyślna jednostka — migruj ZAWSZE (nawet gdy lista pusta)
+        $default = get_option( 'fc_default_unit', '' );
+        if ( isset( self::LEGACY_MAP[ $default ] ) ) {
+            update_option( 'fc_default_unit', self::LEGACY_MAP[ $default ] );
+        }
+
+        // Meta produktów — migruj ZAWSZE
+        global $wpdb;
+        foreach ( self::LEGACY_MAP as $old => $new ) {
+            $wpdb->update(
+                $wpdb->postmeta,
+                array( 'meta_value' => $new ),
+                array( 'meta_key' => '_fc_unit', 'meta_value' => $old )
+            );
+        }
+
+        // Lista jednostek
+        $units = get_option( self::OPTION_KEY );
+        if ( is_array( $units ) && ! empty( $units ) ) {
+            $migrated = array_map( function( $u ) {
+                return isset( FC_Units_Admin::LEGACY_MAP[ $u ] ) ? FC_Units_Admin::LEGACY_MAP[ $u ] : $u;
+            }, $units );
+            $migrated = array_unique( $migrated );
+            sort( $migrated );
+            update_option( self::OPTION_KEY, $migrated );
+        }
+
+        // Seeduj domyślne jeśli brak
+        self::seed_defaults();
+
+        update_option( 'fc_units_migrated_v2', '1' );
+    }
+
+    /**
+     * Seedowanie domyślnych jednostek (wywoływane z activate() i migrate)
+     */
+    public static function seed_defaults() {
+        $units = get_option( self::OPTION_KEY );
+        if ( ! is_array( $units ) || empty( $units ) ) {
+            update_option( self::OPTION_KEY, self::DEFAULTS );
+        }
+        $default = get_option( 'fc_default_unit', '' );
+        if ( empty( $default ) || ! in_array( $default, self::DEFAULTS, true ) ) {
+            update_option( 'fc_default_unit', 'pcs' );
+        }
+    }
+
+    /**
+     * Tłumaczenie slugu jednostki na zlokalizowaną etykietę
+     */
+    public static function label( $slug ) {
+        if ( empty( $slug ) ) return '';
+        $key = 'unit_' . $slug;
+        $translated = fc__( $key );
+        return $translated !== $key ? $translated : $slug;
+    }
+
+    /**
+     * Pobierz domyślną jednostkę (slug)
      */
     public static function get_default() {
-        return get_option( 'fc_default_unit', 'szt.' );
+        return get_option( 'fc_default_unit', 'pcs' );
     }
 
     /**
@@ -129,7 +207,7 @@ class FC_Units_Admin {
             wp_die( fc__( 'attr_no_permissions' ) );
         }
 
-        $default = isset( $_POST['fc_default_unit'] ) ? sanitize_text_field( $_POST['fc_default_unit'] ) : 'szt.';
+        $default = isset( $_POST['fc_default_unit'] ) ? sanitize_text_field( $_POST['fc_default_unit'] ) : 'pcs';
         update_option( 'fc_default_unit', $default );
 
         wp_safe_redirect( admin_url( 'edit.php?post_type=fc_product&page=fc-units&default_saved=1' ) );
@@ -321,7 +399,7 @@ class FC_Units_Admin {
                             <label for="fc_default_unit"><?php fc_e( 'unit_default_unit_2' ); ?></label>
                             <select name="fc_default_unit" id="fc_default_unit" style="width:100%;">
                                 <?php foreach ( $units as $unit ) : ?>
-                                    <option value="<?php echo esc_attr( $unit ); ?>" <?php selected( $default_unit, $unit ); ?>><?php echo esc_html( $unit ); ?></option>
+                                    <option value="<?php echo esc_attr( $unit ); ?>" <?php selected( $default_unit, $unit ); ?>><?php echo esc_html( self::label( $unit ) ); ?></option>
                                 <?php endforeach; ?>
                             </select>
                             <p class="description"><?php fc_e( 'unit_unit_used_when_a_product_does_not_have_its_own_ass' ); ?></p>
@@ -416,7 +494,7 @@ class FC_Units_Admin {
                                         <tr class="fc-unit-row" data-unit="<?php echo esc_attr( $unit ); ?>">
                                             <td><input type="checkbox" name="bulk_units[]" value="<?php echo esc_attr( $unit ); ?>" class="fc-unit-cb"></td>
                                             <td>
-                                                <strong class="fc-unit-name-display"><?php echo esc_html( $unit ); ?></strong>
+                                                <strong class="fc-unit-name-display"><?php echo esc_html( self::label( $unit ) ); ?></strong>
                                                 <?php if ( $unit === $default_unit ) : ?>
                                                     <span class="fc-unit-default-badge"><?php fc_e( 'unit_default' ); ?></span>
                                                 <?php endif; ?>
@@ -426,7 +504,7 @@ class FC_Units_Admin {
                                                     <button type="button" class="button button-small fc-unit-edit-cancel"><?php fc_e( 'coupon_cancel' ); ?></button>
                                                 </div>
                                             </td>
-                                            <td class="fc-unit-preview">99,99 zł / <?php echo esc_html( $unit ); ?></td>
+                                            <td class="fc-unit-preview"><?php echo fc_format_price( 99.99 ); ?> / <?php echo esc_html( self::label( $unit ) ); ?></td>
                                             <td>
                                                 <a href="#" class="fc-unit-edit-link"><?php fc_e( 'attr_edit' ); ?></a>
                                                 <span class="fc-unit-sep">|</span>

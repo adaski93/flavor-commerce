@@ -1956,6 +1956,9 @@ class FC_Settings {
         }
         $preview_data = self::get_order_preview_data( $selected_order_id, $edit_lang );
         ?>
+
+        <?php FC_SMTP::render_smtp_section(); ?>
+
         <form method="post">
             <?php wp_nonce_field( 'fc_emails_nonce', 'fc_emails_nonce' ); ?>
             <input type="hidden" name="fc_email_lang" value="<?php echo esc_attr( $edit_lang ); ?>">
@@ -2025,10 +2028,16 @@ class FC_Settings {
             });
             </script>
 
-            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin-bottom:16px;flex-wrap:wrap;">
-                <div class="description" style="margin:0;flex:1;min-width:300px;">
-                    <strong><?php fc_e( 'set_available_variables_in_templates' ); ?></strong>
-                    <style>.fc-email-vars{display:grid;grid-template-columns:1fr 1fr;gap:0 32px;margin-top:8px;font-size:13px;}@media(max-width:960px){.fc-email-vars{grid-template-columns:1fr;}}.fc-email-vars .fc-ev{display:flex;padding:3px 0;}.fc-email-vars .fc-ev code{margin-right:8px;white-space:nowrap;}.fc-email-vars .fc-ev span{color:#666;}.fc-email-vars .fc-ev-heading{grid-column:1/-1;padding:8px 0 3px;font-weight:600;color:#333;}</style>
+            <div class="fc-email-block">
+                <div id="fc-vars-header" style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#e8f0fe;border:1px solid #a8c7fa;border-radius:4px;cursor:pointer;user-select:none;margin-bottom:0;" role="button" tabindex="0" aria-expanded="false">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <span class="dashicons dashicons-editor-code" style="color:#2271b1;"></span>
+                        <strong><?php fc_e( 'set_available_variables_in_templates' ); ?></strong>
+                    </div>
+                    <span class="dashicons dashicons-arrow-down-alt2" id="fc-vars-arrow" aria-hidden="true"></span>
+                </div>
+                <div id="fc-vars-body" style="display:none;border:1px solid #a8c7fa;border-top:none;border-radius:0 0 4px 4px;padding:16px;background:#fff;">
+                    <style>.fc-email-block{margin-bottom:12px;}.fc-email-vars{display:grid;grid-template-columns:1fr 1fr;gap:0 32px;font-size:13px;}@media(max-width:960px){.fc-email-vars{grid-template-columns:1fr;}}.fc-email-vars .fc-ev{display:flex;padding:3px 0;}.fc-email-vars .fc-ev code{margin-right:8px;white-space:nowrap;}.fc-email-vars .fc-ev span{color:#666;}.fc-email-vars .fc-ev-heading{grid-column:1/-1;padding:8px 0 3px;font-weight:600;color:#333;}</style>
                     <div class="fc-email-vars">
                         <div class="fc-ev"><code>{header}</code><span><?php fc_e( 'set_shared_header_html_editable_above' ); ?></span></div>
                         <div class="fc-ev"><code>{footer}</code><span><?php fc_e( 'set_shared_footer_html_editable_above' ); ?></span></div>
@@ -2078,6 +2087,18 @@ class FC_Settings {
                     </div>
                 </div>
             </div>
+            <script>
+            jQuery(function($){
+                var varsOpen=false;
+                $('#fc-vars-header').on('click keypress',function(e){
+                    if(e.type==='keypress'&&e.which!==13&&e.which!==32)return;
+                    varsOpen=!varsOpen;
+                    $('#fc-vars-body').slideToggle(200);
+                    $('#fc-vars-arrow').toggleClass('dashicons-arrow-down-alt2',!varsOpen).toggleClass('dashicons-arrow-up-alt2',varsOpen);
+                    $(this).attr('aria-expanded',varsOpen);
+                });
+            });
+            </script>
 
             <div style="display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-bottom:16px;width:100%;box-sizing:border-box;">
                 <label for="fc-email-preview-order" style="font-weight:600;white-space:nowrap;">
@@ -2396,8 +2417,6 @@ class FC_Settings {
                 </button>
             </div>
         </form>
-
-        <?php FC_SMTP::render_smtp_section(); ?>
 
         <script>
         jQuery(function($){
@@ -3220,7 +3239,7 @@ class FC_Settings {
             }
         }
 
-        wp_mail( $customer['email'], $subject, $body, $headers, $attachments );
+        FC_SMTP::send_mail( $customer['email'], $subject, $body, $headers, $attachments );
 
         // Wyczyść tymczasowy plik PDF
         if ( $tmp_pdf_path ) {
@@ -3280,7 +3299,7 @@ class FC_Settings {
             'From: ' . $store_name . ' <' . $from_email . '>',
         );
 
-        wp_mail( $admin_email, $subject, $body, $headers );
+        FC_SMTP::send_mail( $admin_email, $subject, $body, $headers );
     }
 
     /**
@@ -3331,7 +3350,7 @@ class FC_Settings {
             'From: ' . $store_name . ' <' . get_option( 'fc_store_email', get_option( 'admin_email' ) ) . '>',
         );
 
-        wp_mail( $user->user_email, $subject, $body, $headers );
+        FC_SMTP::send_mail( $user->user_email, $subject, $body, $headers );
     }
 
     /**
@@ -3382,7 +3401,7 @@ class FC_Settings {
             'From: ' . $store_name . ' <' . get_option( 'fc_store_email', get_option( 'admin_email' ) ) . '>',
         );
 
-        wp_mail( $user->user_email, $subject, $body, $headers );
+        FC_SMTP::send_mail( $user->user_email, $subject, $body, $headers );
     }
 
     /**
@@ -3433,7 +3452,7 @@ class FC_Settings {
             'From: ' . $store_name . ' <' . get_option( 'fc_store_email', get_option( 'admin_email' ) ) . '>',
         );
 
-        return wp_mail( $email, $subject, $body, $headers );
+        return FC_SMTP::send_mail( $email, $subject, $body, $headers ) === true;
     }
 
     /* ===================================================================
@@ -3602,7 +3621,7 @@ class FC_Settings {
                     : '<div style="width:50px;height:50px;background:' . esc_attr( $tc['footer_bg'] ) . ';border-radius:4px;"></div>';
                 $unit_label = '';
                 if ( $show_units && $product_id ) {
-                    $unit_label = get_post_meta( $product_id, '_fc_unit', true ) ?: FC_Units_Admin::get_default();
+                    $unit_label = FC_Units_Admin::label( get_post_meta( $product_id, '_fc_unit', true ) ?: FC_Units_Admin::get_default() );
                 }
                 $qty_text = intval( $item['quantity'] ) . ( $unit_label ? ' ' . esc_html( $unit_label ) : '' );
                 $variant_label = '';

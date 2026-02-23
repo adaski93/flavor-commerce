@@ -75,8 +75,6 @@ return array(
     'unavailable'                  => 'Unavailable',
     'add'                          => 'Add',
     'buy_now'                      => 'Buy now',
-    'buy_external'                 => 'Buy from external store',
-    'buy_and_download'             => 'Buy and download',
     'details'                      => 'Details',
 
     /* ── Cart ──────────────────────────────────────────────── */
@@ -182,13 +180,12 @@ return array(
     'admin_panel'                  => 'Admin panel',
     'dashboard'                    => 'Dashboard',
     'orders'                       => 'Orders',
-    'downloads'                    => 'Downloads',
     'my_reviews'                   => 'My reviews',
     'edit_details'                 => 'Edit details',
     'logout'                       => 'Logout',
     'total_spent'                  => 'Total spent',
     'reviews_stat'                 => 'Reviews',
-    'dashboard_description'        => 'From your account dashboard, you can view your orders, download files, and edit your details.',
+    'dashboard_description'        => 'From your account dashboard, you can view your orders and edit your details.',
     'recent_orders'                => 'Recent orders',
 
     /* ── Account – orders ──────────────────────────────────── */
@@ -207,10 +204,6 @@ return array(
     'download_invoice'             => 'Download invoice %s',
     'order_items'                  => 'Order items',
 
-    /* ── Account – downloads ───────────────────────────────── */
-    'no_downloads'                 => 'You don\'t have any downloads.',
-    'order'                        => 'Order',
-    'download'                     => 'Download',
 
     /* ── Account – reviews ─────────────────────────────────── */
     'no_reviews'                   => 'You haven\'t added any reviews yet.',
@@ -346,11 +339,8 @@ return array(
 
     /* ── Single product ────────────────────────────────────── */
     'category_label'               => 'Category:',
-    'grouped_products'             => 'Products in bundle:',
     'min_order_quantity'           => 'Minimum order quantity: %d',
     'in_comparator'                => 'In comparator',
-    'type_label'                   => 'Type:',
-    'digital_product'              => 'Digital product',
     'sku_label'                    => 'SKU:',
     'description_tab'              => 'Description',
     'specifications_tab'           => 'Specifications',
@@ -375,6 +365,8 @@ return array(
     'page_wishlist'                => 'Wishlist',
     'page_comparison'              => 'Product comparison',
     'page_retry_payment'           => 'Payment failed',
+    'page_about'                   => 'About us',
+    'page_contact'                 => 'Contact',
 
     /* ── Order statuses (shared frontend/admin) ────────────── */
     'status_pending'               => 'Pending',
@@ -528,21 +520,6 @@ return array(
     'retry_order_already_processed' => 'This order has already been processed.',
     'retry_order_expired'          => 'The time to pay for this order has passed. The order has been cancelled.',
 
-    /* ── Admin: Order Filters & CSV ─────────────────────────── */
-    'admin_order_search_placeholder' => 'Search orders…',
-    'admin_date_from'              => 'Date from',
-    'admin_date_to'                => 'Date to',
-    'admin_export_csv'             => 'Export CSV',
-    'admin_csv_order_nr'           => 'Order No.',
-    'admin_csv_date'               => 'Date',
-    'admin_csv_status'             => 'Status',
-    'admin_csv_customer'           => 'Customer',
-    'admin_csv_email'              => 'E-mail',
-    'admin_csv_phone'              => 'Phone',
-    'admin_csv_address'            => 'Address',
-    'admin_csv_total'              => 'Total',
-    'admin_csv_payment'            => 'Payment',
-    'admin_csv_products'           => 'Products',
 
     // ── AJAX / error messages ──
     'access_denied'                => 'Access denied.',
@@ -561,6 +538,20 @@ return array(
     'empty_name'                   => 'Empty name.',
     'empty_unit_name'              => 'Empty unit name.',
     'unit_already_exists'          => 'Unit already exists.',
+
+    // ── Unit slug labels ──
+    'unit_pcs'                     => 'pcs',
+    'unit_kg'                      => 'kg',
+    'unit_g'                       => 'g',
+    'unit_l'                       => 'l',
+    'unit_ml'                      => 'ml',
+    'unit_m'                       => 'm',
+    'unit_cm'                      => 'cm',
+    'unit_sqm'                     => 'm²',
+    'unit_cbm'                     => 'm³',
+    'unit_pack'                    => 'pack',
+    'unit_set'                     => 'set',
+
     'no_results'                   => 'No results',
 
     // ── Coupon messages ──
@@ -582,4 +573,36 @@ return array(
 
     // ── Theme: Icon fallbacks ──
     'theme_compare'                => 'Compare',
+
+    // ── Contact page ──
+    'contact_form_title'           => 'Send us a message',
+    'contact_label_name'           => 'Your name',
+    'contact_label_email'          => 'E-mail address',
+    'contact_label_subject'        => 'Subject',
+    'contact_label_message'        => 'Message',
+    'contact_btn_send'             => 'Send message',
+    'contact_success'              => 'Your message has been sent successfully. We will reply as soon as possible!',
+    'contact_error_required'       => 'Please fill in all required fields.',
+    'contact_error_email'          => 'Please enter a valid e-mail address.',
+    'contact_error_send'           => 'An error occurred while sending the message. Please try again later.',
+    'contact_new_message'          => 'New message from contact form',
+    'contact_mail_name'            => 'Name',
+    'contact_mail_email'           => 'E-mail',
+    'contact_mail_subject'         => 'Subject',
+    'contact_mail_message'         => 'Message',
+    'contact_info_title'           => 'Our company',
+    'contact_reach_us'             => 'Reach us',
+    'contact_hours_title'          => 'Opening hours',
+    'contact_hours_from'           => 'from',
+    'contact_hours_to'             => 'to',
+    'day_mon'                      => 'Mon',
+    'day_tue'                      => 'Tue',
+    'day_wed'                      => 'Wed',
+    'day_thu'                      => 'Thu',
+    'day_fri'                      => 'Fri',
+    'day_sat'                      => 'Sat',
+    'day_sun'                      => 'Sun',
+    'contact_social_title'         => 'Follow us',
+    'contact_nip_label'            => 'Tax ID',
+    'contact_crn_label'            => 'Reg. No.',
 );

@@ -455,15 +455,16 @@
       function (res) {
         $btn.prop("disabled", false).text(fc_admin_vars.i18n.add_unit);
         if (res.success) {
-          var unitName = res.data.name;
+          var unitSlug = res.data.name;
+          var unitLabel = res.data.label || unitSlug;
           $("#fc_unit").append(
             '<option value="' +
-              $("<span>").text(unitName).html() +
+              $("<span>").text(unitSlug).html() +
               '">' +
-              $("<span>").text(unitName).html() +
+              $("<span>").text(unitLabel).html() +
               "</option>",
           );
-          $("#fc_unit").val(unitName);
+          $("#fc_unit").val(unitSlug);
           $("#fc_new_unit_name").val("");
           $("#fc_add_unit_form").slideUp(200);
           $("#fc_add_unit_toggle").show();
@@ -492,7 +493,7 @@
       .addClass("active");
 
     // Hide all conditional sections
-    $(".fc-section-simple, .fc-section-variable, .fc-section-digital").hide();
+    $(".fc-section-simple, .fc-section-variable").hide();
 
     // Show sections matching this type
     $(".fc-section-" + type).show();
@@ -539,7 +540,7 @@
         .remove();
     }
 
-    // Switching away from simple/digital to variable — clear simple fields
+    // Switching away from simple to variable — clear simple fields
     var hadSimpleData =
       fcPrevProductType !== "variable" &&
       ($("#fc_price").val() !== "" ||
@@ -1670,10 +1671,6 @@
   }
 
   // ===================================================================
-  //  Digital Product — File picker
-  // ===================================================================
-
-  // ===================================================================
   //  Autocomplete / suggestions for attribute names in product editor
   // ===================================================================
 
@@ -2102,23 +2099,6 @@
     }
   });
 
-  // ===== Digital: File picker =====
-  $(document).on("click", "#fc_choose_file", function (e) {
-    e.preventDefault();
-
-    var frame = wp.media({
-      title: fc_admin_vars.i18n.media_select_download,
-      multiple: false,
-    });
-
-    frame.on("select", function () {
-      var att = frame.state().get("selection").first().toJSON();
-      $("#fc_digital_file").val(att.url);
-    });
-
-    frame.open();
-  });
-
   // ===== Units: inline edit & bulk check-all =====
   (function () {
     if (!$(".fc-units-page").length) return;
@@ -2342,48 +2322,5 @@
         $(this).hide();
       }
     });
-  });
-
-  /* ── CSV Export for Orders ──────────────────────────── */
-  $(document).on("click", ".fc-export-csv-btn", function (e) {
-    e.preventDefault();
-    var $btn = $(this);
-    $btn.prop("disabled", true).text("⏳");
-
-    var params = new URLSearchParams(window.location.search);
-    var data = {
-      action: "fc_export_orders_csv",
-      nonce: fc_admin_vars.nonce,
-      fc_status: params.get("fc_status") || "",
-      fc_search: $('input[name="fc_search"]').val() || "",
-      fc_date_from: $('input[name="fc_date_from"]').val() || "",
-      fc_date_to: $('input[name="fc_date_to"]').val() || "",
-    };
-
-    $.post(ajaxurl, data, function (res) {
-      if (res.success && res.data.csv) {
-        var raw = atob(res.data.csv);
-        var bytes = new Uint8Array(raw.length);
-        for (var i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
-        var blob = new Blob([bytes], { type: "text/csv;charset=utf-8;" });
-        var link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = res.data.filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        fcAdminToast(fc_admin_vars.i18n.saved || "OK", "success");
-      } else {
-        fcAdminToast(fc_admin_vars.i18n.save_error || "Error", "error");
-      }
-    })
-      .fail(function () {
-        fcAdminToast(fc_admin_vars.i18n.save_error || "Error", "error");
-      })
-      .always(function () {
-        $btn
-          .prop("disabled", false)
-          .text(fc_admin_vars.i18n.export_csv || "Export CSV");
-      });
   });
 })(jQuery);

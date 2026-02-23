@@ -728,7 +728,7 @@ class FC_Shortcodes {
                         <span><?php echo fc_format_price( $price, $product_id ); ?></span>
                     <?php endif; ?>
                     <?php if ( ! empty( $unit ) && FC_Units_Admin::is_visible( 'shop' ) ) : ?>
-                        <span class="fc-price-unit">/ <?php echo esc_html( $unit ); ?></span>
+                        <span class="fc-price-unit">/ <?php echo esc_html( FC_Units_Admin::label( $unit ) ); ?></span>
                     <?php endif; ?>
                 </div>
 
@@ -1580,7 +1580,7 @@ class FC_Shortcodes {
                                         <br><small class="fc-cart-variant-label"><?php echo esc_html( $variant_name ); ?></small>
                                     <?php endif; ?>
                                 </td>
-                                <td class="fc-cart-price"><?php echo fc_format_price( $price ); ?><?php if ( FC_Units_Admin::is_visible( 'cart' ) ) : ?><span class="fc-price-unit">/ <?php echo esc_html( get_post_meta( $item['product_id'], '_fc_unit', true ) ?: FC_Units_Admin::get_default() ); ?></span><?php endif; ?></td>
+                                <td class="fc-cart-price"><?php echo fc_format_price( $price ); ?><?php if ( FC_Units_Admin::is_visible( 'cart' ) ) : ?><span class="fc-price-unit">/ <?php echo esc_html( FC_Units_Admin::label( get_post_meta( $item['product_id'], '_fc_unit', true ) ?: FC_Units_Admin::get_default() ) ); ?></span><?php endif; ?></td>
                                 <td class="fc-cart-qty">
                                     <input type="number" class="fc-qty-input" value="<?php echo esc_attr( $item['quantity'] ); ?>" min="1" max="99" data-product-id="<?php echo esc_attr( $cart_key ); ?>">
                                 </td>
@@ -2200,7 +2200,7 @@ class FC_Shortcodes {
                                 }
                                 $unit_label = '';
                                 if ( FC_Units_Admin::is_visible( 'checkout' ) ) {
-                                    $unit_label = ' ' . esc_html( get_post_meta( $item['product_id'], '_fc_unit', true ) ?: FC_Units_Admin::get_default() );
+                                    $unit_label = ' ' . esc_html( FC_Units_Admin::label( get_post_meta( $item['product_id'], '_fc_unit', true ) ?: FC_Units_Admin::get_default() ) );
                                 }
                             ?>
                                 <tr>
@@ -2303,7 +2303,7 @@ class FC_Shortcodes {
                             <?php if ( is_array( $items ) ) : foreach ( $items as $item ) :
                                 $item_unit = '';
                                 if ( FC_Units_Admin::is_visible( 'thank_you' ) && ! empty( $item['product_id'] ) ) {
-                                    $item_unit = get_post_meta( $item['product_id'], '_fc_unit', true ) ?: FC_Units_Admin::get_default();
+                                    $item_unit = FC_Units_Admin::label( get_post_meta( $item['product_id'], '_fc_unit', true ) ?: FC_Units_Admin::get_default() );
                                 }
                                 $v_attrs_html = '';
                                 if ( ! empty( $item['attribute_values'] ) && is_array( $item['attribute_values'] ) ) {

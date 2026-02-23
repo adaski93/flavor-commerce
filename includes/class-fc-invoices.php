@@ -793,7 +793,7 @@ class FC_Invoices {
                 $bg = ( $lp % 2 === 0 ) ? ' background:' . $c['row_alt'] . ';' : '';
                 $unit_label = '';
                 if ( $show_units && ! empty( $item['product_id'] ) ) {
-                    $unit_label = get_post_meta( $item['product_id'], '_fc_unit', true ) ?: FC_Units_Admin::get_default();
+                    $unit_label = FC_Units_Admin::label( get_post_meta( $item['product_id'], '_fc_unit', true ) ?: FC_Units_Admin::get_default() );
                 }
 
                 $html .= '<tr style="' . $bg . '">';

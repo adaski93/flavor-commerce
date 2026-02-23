@@ -323,7 +323,6 @@ class FC_Product_Meta {
                 $labels = array(
                     'simple'   => '<span class="dashicons dashicons-archive" style="font-size:20px;width:20px;height:20px;color:#666;" title="' . esc_attr( fc__( 'meta_type_simple' ) ) . '"></span>',
                     'variable' => '<span class="dashicons dashicons-networking" style="font-size:20px;width:20px;height:20px;color:#2271b1;" title="' . esc_attr( fc__( 'meta_type_variable' ) ) . '"></span>',
-                    'digital'  => '<span class="dashicons dashicons-download" style="font-size:20px;width:20px;height:20px;color:#8e44ad;" title="' . esc_attr( fc__( 'meta_type_digital' ) ) . '"></span>',
                 );
                 echo isset( $labels[ $type ] ) ? $labels[ $type ] : $labels['simple'];
                 break;
@@ -388,7 +387,7 @@ class FC_Product_Meta {
                     echo '<span style="color:#e74c3c;">✗ ' . fc__( 'meta_none' ) . '</span>';
                 } elseif ( $manage === '1' && $stock !== '' ) {
                     $color = intval( $stock ) > 0 ? '#27ae60' : '#e74c3c';
-                    echo '<span style="color:' . $color . ';">' . intval( $stock ) . ' ' . esc_html( $unit ) . '</span>';
+                    echo '<span style="color:' . $color . ';">' . intval( $stock ) . ' ' . esc_html( FC_Units_Admin::label( $unit ) ) . '</span>';
                 } else {
                     echo '<span style="color:#27ae60;">✓ ' . fc__( 'prod_in_stock' ) . '</span>';
                 }
