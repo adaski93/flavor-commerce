@@ -1201,6 +1201,8 @@ return array(
     'cust_about_hero_pos_right_center' => 'Prawo środek',
     'cust_about_hero_pos_right_bottom' => 'Prawo dół',
     'cust_about_hero_subtitle'     => 'Podtytuł',
+    'cust_about_hero_overlay'      => 'Nakładka na zdjęcie',
+    'cust_about_hero_overlay_color' => 'Kolor nakładki (rgba)',
     'cust_about_content'           => 'Treść strony',
     'cust_about_content_hint'      => 'Tu pojawi się treść z edytora WordPress.',
     'cust_about_team'              => 'Nasz zespół',

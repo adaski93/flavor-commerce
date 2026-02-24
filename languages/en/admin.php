@@ -1201,6 +1201,8 @@ return array(
     'cust_about_hero_pos_right_center' => 'Right center',
     'cust_about_hero_pos_right_bottom' => 'Right bottom',
     'cust_about_hero_subtitle'     => 'Subtitle text',
+    'cust_about_hero_overlay'      => 'Image overlay',
+    'cust_about_hero_overlay_color' => 'Overlay color (rgba)',
     'cust_about_content'           => 'Page content',
     'cust_about_content_hint'      => 'Content from the WordPress editor will appear here.',
     'cust_about_team'              => 'Our team',
