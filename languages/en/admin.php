@@ -1186,7 +1186,7 @@ return array(
     'cust_about_info_desc'         => 'Choose which sections to show and set their content.',
     'cust_about_sections_order'    => 'Section order',
     'cust_about_sections_order_desc' => 'Drag to reorder sections.',
-    'cust_about_hero'              => 'Hero banner',
+    'cust_about_hero'              => 'Page header',
     'cust_about_hero_image'        => 'Background image',
     'cust_about_hero_image_btn'    => 'Choose image',
     'cust_about_hero_image_remove' => 'Remove',
