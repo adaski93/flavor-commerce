@@ -70,6 +70,9 @@ return array(
     'badge_eco'                    => 'Eco',
     'badge_handmade'               => 'Handmade',
 
+    /* ── About page ────────────────────────────────────────── */
+    'about_hero_default_subtitle'  => 'Discover our story, team, and values',
+
     /* ── Product actions ───────────────────────────────────── */
     'choose_variants'              => 'Choose variants',
     'add_to_cart'                  => 'Add to cart',
