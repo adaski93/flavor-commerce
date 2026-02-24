@@ -1244,7 +1244,7 @@ return array(
     'cust_about_content_text'      => 'Treść',
     'cust_about_content_image'     => 'Zdjęcie (opcjonalne)',
     'cust_about_content_image_btn' => 'Wybierz zdjęcie',
-    'cust_about_content_add'       => '+ Dodaj blok treści',
+    'cust_about_content_add'       => 'Dodaj blok treści',
     'cust_about_team'              => 'Nasz zespół',
     'cust_about_team_title'        => 'Tytuł sekcji',
     'cust_about_team_add'          => 'Dodaj członka zespołu',

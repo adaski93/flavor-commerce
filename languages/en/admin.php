@@ -1244,7 +1244,7 @@ return array(
     'cust_about_content_text'      => 'Text',
     'cust_about_content_image'     => 'Image (optional)',
     'cust_about_content_image_btn' => 'Choose image',
-    'cust_about_content_add'       => '+ Add content block',
+    'cust_about_content_add'       => 'Add content block',
     'cust_about_team'              => 'Our team',
     'cust_about_team_title'        => 'Section title',
     'cust_about_team_add'          => 'Add team member',
