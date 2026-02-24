@@ -1187,6 +1187,7 @@ return array(
     'cust_about_sections_order'    => 'Kolejność sekcji',
     'cust_about_sections_order_desc' => 'Przeciągnij, aby zmienić kolejność.',
     'cust_about_hero'              => 'Nagłówek strony',
+    'cust_about_hero_enabled'      => 'Włącz nagłówek',
     'cust_about_hero_image'        => 'Zdjęcie w tle',
     'cust_about_hero_image_btn'    => 'Wybierz zdjęcie',
     'cust_about_hero_image_remove' => 'Usuń',
