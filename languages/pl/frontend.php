@@ -617,4 +617,12 @@ return array(
     'about_values_title'           => 'Nasze wartości',
     'about_stats_title'            => 'W liczbach',
     'about_testimonials_title'     => 'Co mówią nasi klienci',
-    'about_timeline_title'         => 'Nasza historia',);
+    'about_timeline_title'         => 'Nasza historia',
+
+    // ── Stopka ──
+    'footer_contact_title'         => 'Kontakt',
+    'footer_newsletter_title'      => 'Newsletter',
+    'footer_newsletter_default_text' => 'Zapisz się, aby otrzymywać najnowsze oferty i aktualności.',
+    'footer_newsletter_placeholder' => 'Twój adres e-mail',
+    'footer_newsletter_button'     => 'Zapisz się',
+);

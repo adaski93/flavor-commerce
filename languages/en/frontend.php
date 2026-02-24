@@ -619,4 +619,11 @@ return array(
     'about_stats_title'            => 'In Numbers',
     'about_testimonials_title'     => 'What Our Customers Say',
     'about_timeline_title'         => 'Our Story',
+
+    // ── Footer ──
+    'footer_contact_title'         => 'Contact',
+    'footer_newsletter_title'      => 'Newsletter',
+    'footer_newsletter_default_text' => 'Subscribe to receive the latest deals and news.',
+    'footer_newsletter_placeholder' => 'Your email address',
+    'footer_newsletter_button'     => 'Subscribe',
 );
