@@ -1236,4 +1236,23 @@ return array(
     'cust_about_timeline_desc'     => 'Description',
     'cust_about_remove_item'       => 'Remove',
 
+    /* ── Badge settings (auto-badge) ───────────────────────── */
+    'badge_badges'                 => 'Badges',
+    'badge_badges_settings'        => 'Badge settings',
+    'badge_auto_assign'            => 'Auto-assign',
+    'badge_bestseller_title'       => 'Bestseller',
+    'badge_bestseller_auto_desc'   => 'Automatically assign the Bestseller badge to products that exceed the sales threshold.',
+    'badge_min_sales'              => 'Minimum sales (qty)',
+    'badge_min_sales_desc'         => 'A product must sell at least this many units to receive the badge.',
+    'badge_max_products'           => 'Max products with badge',
+    'badge_max_products_desc'      => 'Only this many top-selling products can have the badge at once.',
+    'badge_new_title'              => 'New',
+    'badge_new_auto_desc'          => 'Automatically assign the New badge to newly published products.',
+    'badge_new_duration'           => 'Duration (days)',
+    'badge_new_duration_desc'      => 'How many days after publishing the product will carry the New badge.',
+    'badge_last_items_title'       => 'Last items',
+    'badge_last_items_auto_desc'   => 'Automatically assign the badge when stock falls below the threshold.',
+    'badge_last_items_threshold'   => 'Stock threshold (qty)',
+    'badge_last_items_threshold_desc' => 'The badge will appear when stock is at or below this value.',
+
 );

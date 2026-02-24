@@ -68,6 +68,7 @@ return array(
     'badge_limited'                => 'Limited edition',
     'badge_last_items'             => 'Last items',
     'badge_eco'                    => 'Eco',
+    'badge_handmade'               => 'Handmade',
 
     /* ── Product actions ───────────────────────────────────── */
     'choose_variants'              => 'Choose variants',

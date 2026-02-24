@@ -68,6 +68,7 @@ return array(
     'badge_limited'                => 'Limitowana edycja',
     'badge_last_items'             => 'Ostatnie sztuki',
     'badge_eco'                    => 'Eko',
+    'badge_handmade'               => 'Ręczna robota',
 
     /* ── Product actions ───────────────────────────────────── */
     'choose_variants'              => 'Wybierz warianty',

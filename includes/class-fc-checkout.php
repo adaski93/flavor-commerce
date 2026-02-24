@@ -520,14 +520,20 @@ class FC_Checkout {
     }
 
     /**
-     * Zmniejsz stan magazynowy
+     * Zmniejsz stan magazynowy i zwiększ licznik sprzedaży
      */
     private static function reduce_stock( $order_id ) {
         $items = get_post_meta( $order_id, '_fc_order_items', true );
         if ( ! is_array( $items ) ) return;
 
         foreach ( $items as $item ) {
+            $product_id = $item['product_id'];
+            $qty        = isset( $item['quantity'] ) ? absint( $item['quantity'] ) : 1;
             $variant_id = ! empty( $item['variant_id'] ) ? $item['variant_id'] : '';
+
+            // Zwiększ łączną liczbę sprzedaży produktu
+            $current_sales = absint( get_post_meta( $product_id, '_fc_total_sales', true ) );
+            update_post_meta( $product_id, '_fc_total_sales', $current_sales + $qty );
 
             if ( $variant_id ) {
                 // Zmniejsz stan wariantu (warianty mają własne pole stock)
@@ -565,6 +571,9 @@ class FC_Checkout {
                 }
             }
         }
+
+        // Invalidate bestsellers cache
+        delete_transient( 'fc_auto_bestseller_ids' );
     }
 
     /**

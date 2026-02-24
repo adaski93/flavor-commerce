@@ -1236,4 +1236,23 @@ return array(
     'cust_about_timeline_desc'     => 'Opis',
     'cust_about_remove_item'       => 'Usuń',
 
+    /* ── Ustawienia odznak (auto-badge) ─────────────────────── */
+    'badge_badges'                 => 'Odznaki',
+    'badge_badges_settings'        => 'Ustawienia odznak',
+    'badge_auto_assign'            => 'Automatyczne przypisywanie',
+    'badge_bestseller_title'       => 'Bestseller',
+    'badge_bestseller_auto_desc'   => 'Automatycznie przypisuj odznakę Bestseller produktom, które przekroczą próg sprzedaży.',
+    'badge_min_sales'              => 'Minimalna sprzedaż (szt.)',
+    'badge_min_sales_desc'         => 'Produkt musi sprzedać co najmniej tyle sztuk, aby otrzymać odznakę.',
+    'badge_max_products'           => 'Maks. produktów z odznaką',
+    'badge_max_products_desc'      => 'Tylko tyle najlepiej sprzedających się produktów może mieć tę odznakę jednocześnie.',
+    'badge_new_title'              => 'Nowość',
+    'badge_new_auto_desc'          => 'Automatycznie przypisuj odznakę Nowość nowo opublikowanym produktom.',
+    'badge_new_duration'           => 'Czas trwania (dni)',
+    'badge_new_duration_desc'      => 'Ile dni po publikacji produkt będzie miał odznakę Nowość.',
+    'badge_last_items_title'       => 'Ostatnie sztuki',
+    'badge_last_items_auto_desc'   => 'Automatycznie przypisuj odznakę gdy stan magazynowy spadnie poniżej progu.',
+    'badge_last_items_threshold'   => 'Próg magazynowy (szt.)',
+    'badge_last_items_threshold_desc' => 'Odznaka pojawi się gdy stan magazynowy będzie równy lub niższy od tej wartości.',
+
 );

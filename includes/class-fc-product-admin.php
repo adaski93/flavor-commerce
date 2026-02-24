@@ -29,6 +29,7 @@ class FC_Product_Admin {
         add_action( 'admin_post_fc_force_delete_product', array( __CLASS__, 'handle_force_delete' ) );
         add_action( 'admin_post_fc_empty_trash', array( __CLASS__, 'handle_empty_trash' ) );
         add_action( 'admin_init', array( __CLASS__, 'redirect_default_editor' ) );
+        add_action( 'admin_init', array( __CLASS__, 'register_badge_settings' ) );
         add_action( 'wp_ajax_fc_admin_add_category', array( __CLASS__, 'ajax_add_category' ) );
         add_action( 'wp_ajax_fc_admin_add_brand', array( __CLASS__, 'ajax_add_brand' ) );
         add_action( 'wp_ajax_fc_admin_add_unit', array( __CLASS__, 'ajax_add_unit' ) );
@@ -80,6 +81,16 @@ class FC_Product_Admin {
             array( __CLASS__, 'render_form' )
         );
 
+        // Odznaki — ustawienia automatycznych odznak
+        add_submenu_page(
+            'edit.php?post_type=fc_product',
+            fc__( 'badge_badges_settings', 'admin' ),
+            fc__( 'badge_badges', 'admin' ),
+            'manage_options',
+            'fc-badges',
+            array( __CLASS__, 'render_badges_page' )
+        );
+
         // Recenzje w podmenu produktów
         add_submenu_page(
             'edit.php?post_type=fc_product',
@@ -91,6 +102,252 @@ class FC_Product_Admin {
 
         // Usuń domyślne "Dodaj nowy produkt" z menu
         remove_submenu_page( 'edit.php?post_type=fc_product', 'post-new.php?post_type=fc_product' );
+    }
+
+    /**
+     * Rejestruj ustawienia odznak
+     */
+    public static function register_badge_settings() {
+        register_setting( 'fc_badges_settings', 'fc_badge_bestseller_auto' );
+        register_setting( 'fc_badges_settings', 'fc_badge_bestseller_min_sales', array(
+            'type' => 'integer', 'default' => 10, 'sanitize_callback' => 'absint',
+        ) );
+        register_setting( 'fc_badges_settings', 'fc_badge_bestseller_max_products', array(
+            'type' => 'integer', 'default' => 10, 'sanitize_callback' => 'absint',
+        ) );
+        register_setting( 'fc_badges_settings', 'fc_badge_new_auto' );
+        register_setting( 'fc_badges_settings', 'fc_badge_new_duration', array(
+            'type' => 'integer', 'default' => 14, 'sanitize_callback' => 'absint',
+        ) );
+        register_setting( 'fc_badges_settings', 'fc_badge_last_items_auto' );
+        register_setting( 'fc_badges_settings', 'fc_badge_last_items_threshold', array(
+            'type' => 'integer', 'default' => 5, 'sanitize_callback' => 'absint',
+        ) );
+    }
+
+    /**
+     * Strona ustawień odznak
+     */
+    public static function render_badges_page() {
+        if ( ! current_user_can( 'manage_options' ) ) return;
+        ?>
+        <div class="wrap fc-admin-wrap">
+            <h1 class="fc-admin-title">
+                <span class="dashicons dashicons-awards"></span>
+                <?php fc_e( 'badge_badges_settings', 'admin' ); ?>
+            </h1>
+
+            <form method="post" action="options.php">
+                <?php settings_fields( 'fc_badges_settings' ); ?>
+
+                <?php
+                $bs_auto  = get_option( 'fc_badge_bestseller_auto', '0' );
+                $bs_min   = get_option( 'fc_badge_bestseller_min_sales', 10 );
+                $bs_max   = get_option( 'fc_badge_bestseller_max_products', 10 );
+                $nw_auto  = get_option( 'fc_badge_new_auto', '0' );
+                $nw_dur   = get_option( 'fc_badge_new_duration', 14 );
+                $li_auto  = get_option( 'fc_badge_last_items_auto', '0' );
+                $li_thr   = get_option( 'fc_badge_last_items_threshold', 5 );
+                ?>
+
+                <!-- Bestseller -->
+                <div class="fc-form-card" style="max-width:720px;margin-bottom:20px;">
+                    <div class="fc-card-header" style="display:flex;align-items:center;gap:8px;">
+                        <span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#e74c3c;"></span>
+                        <?php fc_e( 'badge_bestseller_title', 'admin' ); ?>
+                    </div>
+                    <div class="fc-card-body">
+                        <table class="form-table" style="margin:0;">
+                            <tr>
+                                <th style="width:220px;">
+                                    <label for="fc_badge_bestseller_auto"><?php fc_e( 'badge_auto_assign', 'admin' ); ?></label>
+                                </th>
+                                <td>
+                                    <label class="fc-toggle-switch">
+                                        <input type="hidden" name="fc_badge_bestseller_auto" value="0">
+                                        <input type="checkbox" name="fc_badge_bestseller_auto" id="fc_badge_bestseller_auto" value="1" <?php checked( $bs_auto, '1' ); ?>>
+                                        <span class="fc-toggle-slider"></span>
+                                    </label>
+                                    <p class="description"><?php fc_e( 'badge_bestseller_auto_desc', 'admin' ); ?></p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th><label for="fc_badge_bestseller_min_sales"><?php fc_e( 'badge_min_sales', 'admin' ); ?></label></th>
+                                <td>
+                                    <input type="number" name="fc_badge_bestseller_min_sales" id="fc_badge_bestseller_min_sales" value="<?php echo esc_attr( $bs_min ); ?>" min="1" class="small-text" style="width:80px;">
+                                    <p class="description"><?php fc_e( 'badge_min_sales_desc', 'admin' ); ?></p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th><label for="fc_badge_bestseller_max_products"><?php fc_e( 'badge_max_products', 'admin' ); ?></label></th>
+                                <td>
+                                    <input type="number" name="fc_badge_bestseller_max_products" id="fc_badge_bestseller_max_products" value="<?php echo esc_attr( $bs_max ); ?>" min="1" class="small-text" style="width:80px;">
+                                    <p class="description"><?php fc_e( 'badge_max_products_desc', 'admin' ); ?></p>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Nowość -->
+                <div class="fc-form-card" style="max-width:720px;margin-bottom:20px;">
+                    <div class="fc-card-header" style="display:flex;align-items:center;gap:8px;">
+                        <span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#27ae60;"></span>
+                        <?php fc_e( 'badge_new_title', 'admin' ); ?>
+                    </div>
+                    <div class="fc-card-body">
+                        <table class="form-table" style="margin:0;">
+                            <tr>
+                                <th style="width:220px;">
+                                    <label for="fc_badge_new_auto"><?php fc_e( 'badge_auto_assign', 'admin' ); ?></label>
+                                </th>
+                                <td>
+                                    <label class="fc-toggle-switch">
+                                        <input type="hidden" name="fc_badge_new_auto" value="0">
+                                        <input type="checkbox" name="fc_badge_new_auto" id="fc_badge_new_auto" value="1" <?php checked( $nw_auto, '1' ); ?>>
+                                        <span class="fc-toggle-slider"></span>
+                                    </label>
+                                    <p class="description"><?php fc_e( 'badge_new_auto_desc', 'admin' ); ?></p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th><label for="fc_badge_new_duration"><?php fc_e( 'badge_new_duration', 'admin' ); ?></label></th>
+                                <td>
+                                    <input type="number" name="fc_badge_new_duration" id="fc_badge_new_duration" value="<?php echo esc_attr( $nw_dur ); ?>" min="1" max="365" class="small-text" style="width:80px;">
+                                    <p class="description"><?php fc_e( 'badge_new_duration_desc', 'admin' ); ?></p>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Ostatnie sztuki -->
+                <div class="fc-form-card" style="max-width:720px;margin-bottom:20px;">
+                    <div class="fc-card-header" style="display:flex;align-items:center;gap:8px;">
+                        <span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#c0392b;"></span>
+                        <?php fc_e( 'badge_last_items_title', 'admin' ); ?>
+                    </div>
+                    <div class="fc-card-body">
+                        <table class="form-table" style="margin:0;">
+                            <tr>
+                                <th style="width:220px;">
+                                    <label for="fc_badge_last_items_auto"><?php fc_e( 'badge_auto_assign', 'admin' ); ?></label>
+                                </th>
+                                <td>
+                                    <label class="fc-toggle-switch">
+                                        <input type="hidden" name="fc_badge_last_items_auto" value="0">
+                                        <input type="checkbox" name="fc_badge_last_items_auto" id="fc_badge_last_items_auto" value="1" <?php checked( $li_auto, '1' ); ?>>
+                                        <span class="fc-toggle-slider"></span>
+                                    </label>
+                                    <p class="description"><?php fc_e( 'badge_last_items_auto_desc', 'admin' ); ?></p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th><label for="fc_badge_last_items_threshold"><?php fc_e( 'badge_last_items_threshold', 'admin' ); ?></label></th>
+                                <td>
+                                    <input type="number" name="fc_badge_last_items_threshold" id="fc_badge_last_items_threshold" value="<?php echo esc_attr( $li_thr ); ?>" min="1" max="100" class="small-text" style="width:80px;">
+                                    <p class="description"><?php fc_e( 'badge_last_items_threshold_desc', 'admin' ); ?></p>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <?php submit_button(); ?>
+            </form>
+        </div>
+
+        <style>
+        .fc-toggle-switch {
+            position: relative; display: inline-block; width: 46px; height: 24px; vertical-align: middle;
+        }
+        .fc-toggle-switch input[type="checkbox"] {
+            opacity: 0; width: 0; height: 0; position: absolute;
+        }
+        .fc-toggle-slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background: #ccc; border-radius: 24px; transition: .3s;
+        }
+        .fc-toggle-slider::before {
+            content: ''; position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px;
+            background: #fff; border-radius: 50%; transition: .3s;
+        }
+        .fc-toggle-switch input:checked + .fc-toggle-slider {
+            background: #2271b1;
+        }
+        .fc-toggle-switch input:checked + .fc-toggle-slider::before {
+            transform: translateX(22px);
+        }
+        </style>
+        <?php
+    }
+
+    /**
+     * Pobierz automatyczne odznaki dla produktu
+     *
+     * @param int $product_id
+     * @return array  Klucze odznak do dodania automatycznie
+     */
+    public static function get_auto_badges( $product_id ) {
+        $auto = array();
+
+        // --- Bestseller ---
+        if ( get_option( 'fc_badge_bestseller_auto', '0' ) === '1' ) {
+            $min_sales    = absint( get_option( 'fc_badge_bestseller_min_sales', 10 ) );
+            $max_products = absint( get_option( 'fc_badge_bestseller_max_products', 10 ) );
+            $total_sales  = absint( get_post_meta( $product_id, '_fc_total_sales', true ) );
+
+            if ( $total_sales >= $min_sales ) {
+                // Sprawdź czy produkt mieści się w limicie max_products (top N)
+                $bestseller_ids = get_transient( 'fc_auto_bestseller_ids' );
+                if ( false === $bestseller_ids ) {
+                    global $wpdb;
+                    $bestseller_ids = $wpdb->get_col( $wpdb->prepare(
+                        "SELECT p.ID FROM {$wpdb->posts} p
+                         INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = '_fc_total_sales'
+                         WHERE p.post_type = 'fc_product' AND p.post_status = 'fc_published'
+                           AND CAST(pm.meta_value AS UNSIGNED) >= %d
+                         ORDER BY CAST(pm.meta_value AS UNSIGNED) DESC
+                         LIMIT %d",
+                        $min_sales,
+                        $max_products
+                    ) );
+                    set_transient( 'fc_auto_bestseller_ids', $bestseller_ids, HOUR_IN_SECONDS );
+                }
+                if ( in_array( (string) $product_id, $bestseller_ids, true ) ) {
+                    $auto[] = 'bestseller';
+                }
+            }
+        }
+
+        // --- Nowość ---
+        if ( get_option( 'fc_badge_new_auto', '0' ) === '1' ) {
+            $duration = absint( get_option( 'fc_badge_new_duration', 14 ) );
+            $post     = get_post( $product_id );
+            if ( $post ) {
+                $publish_time = strtotime( $post->post_date );
+                $cutoff       = time() - ( $duration * DAY_IN_SECONDS );
+                if ( $publish_time >= $cutoff ) {
+                    $auto[] = 'new';
+                }
+            }
+        }
+
+        // --- Ostatnie sztuki ---
+        if ( get_option( 'fc_badge_last_items_auto', '0' ) === '1' ) {
+            $threshold    = absint( get_option( 'fc_badge_last_items_threshold', 5 ) );
+            $manage_stock = get_post_meta( $product_id, '_fc_manage_stock', true );
+            $stock_status = get_post_meta( $product_id, '_fc_stock_status', true );
+
+            if ( $manage_stock === '1' && $stock_status !== 'outofstock' ) {
+                $stock = absint( get_post_meta( $product_id, '_fc_stock', true ) );
+                if ( $stock > 0 && $stock <= $threshold ) {
+                    $auto[] = 'last_items';
+                }
+            }
+        }
+
+        return $auto;
     }
 
 

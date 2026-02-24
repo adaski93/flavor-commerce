@@ -402,6 +402,12 @@ class FC_Orders {
 
         foreach ( $items as $item ) {
             $variant_id = ! empty( $item['variant_id'] ) ? $item['variant_id'] : '';
+            $product_id = $item['product_id'];
+            $qty        = isset( $item['quantity'] ) ? absint( $item['quantity'] ) : 1;
+
+            // Zmniejsz licznik sprzedaży
+            $current_sales = absint( get_post_meta( $product_id, '_fc_total_sales', true ) );
+            update_post_meta( $product_id, '_fc_total_sales', max( 0, $current_sales - $qty ) );
 
             if ( $variant_id ) {
                 // Przywróć stan wariantu (niezależnie od _fc_manage_stock)
@@ -438,6 +444,7 @@ class FC_Orders {
         }
 
         update_post_meta( $order_id, '_fc_stock_restored', '1' );
+        delete_transient( 'fc_auto_bestseller_ids' );
     }
 
     /**

@@ -31,6 +31,11 @@ while ( have_posts() ) : the_post();
     if ( ! is_array( $specifications ) ) $specifications = array();
     $product_badges  = get_post_meta( $product_id, '_fc_badges', true );
     if ( ! is_array( $product_badges ) ) $product_badges = array();
+    // Dodaj automatyczne odznaki
+    if ( get_option( 'fc_enable_badges', '1' ) && class_exists( 'FC_Product_Admin' ) ) {
+        $auto_badges    = FC_Product_Admin::get_auto_badges( $product_id );
+        $product_badges = array_unique( array_merge( $product_badges, $auto_badges ) );
+    }
     $upsell_ids      = get_post_meta( $product_id, '_fc_upsell_ids', true );
     if ( ! is_array( $upsell_ids ) ) $upsell_ids = array();
     $crosssell_ids   = get_post_meta( $product_id, '_fc_crosssell_ids', true );
@@ -122,13 +127,14 @@ while ( have_posts() ) : the_post();
             if ( $has_any_badge ) :
                 $badge_colors = array(
                     'bestseller' => '#e74c3c', 'new' => '#27ae60', 'recommended' => '#2980b9',
-                    'free_shipping' => '#8e44ad', 'limited' => '#e67e22', 'last_items' => '#c0392b', 'eco' => '#16a085',
+                    'free_shipping' => '#8e44ad', 'limited' => '#e67e22', 'last_items' => '#c0392b',
+                    'eco' => '#16a085', 'handmade' => '#d35400',
                 );
                 $badge_labels = array(
                     'bestseller' => fc__( 'badge_bestseller' ), 'new' => fc__( 'badge_new' ),
                     'recommended' => fc__( 'badge_recommended' ), 'free_shipping' => fc__( 'badge_free_shipping' ),
                     'limited' => fc__( 'badge_limited' ), 'last_items' => fc__( 'badge_last_items' ),
-                    'eco' => fc__( 'badge_eco' ),
+                    'eco' => fc__( 'badge_eco' ), 'handmade' => fc__( 'badge_handmade' ),
                 );
             ?>
                 <div class="fc-product-badges-wrap">
