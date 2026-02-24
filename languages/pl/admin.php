@@ -1137,6 +1137,7 @@ return array(
     // ── Strona kontaktowa (Customizer) ──
     'cust_contact_info'        => 'Strona kontaktowa',
     'cust_contact_info_desc'   => 'Ustawienia strony kontaktowej.',
+    'cust_contact_hero'             => 'Nagłówek strony',
     'cust_contact_cards_order'      => 'Kolejność sekcji',
     'cust_contact_cards_order_desc' => 'Przeciągnij, aby zmienić kolejność.',
     'cust_contact_show_company' => 'Pokaż nazwę firmy',

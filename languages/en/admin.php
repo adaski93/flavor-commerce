@@ -1137,6 +1137,7 @@ return array(
     // ── Contact info (Customizer) ──
     'cust_contact_info'         => 'Contact page',
     'cust_contact_info_desc'    => 'Contact page settings.',
+    'cust_contact_hero'             => 'Page header',
     'cust_contact_cards_order'      => 'Section order',
     'cust_contact_cards_order_desc' => 'Drag to reorder.',
     'cust_contact_show_company' => 'Show company name',

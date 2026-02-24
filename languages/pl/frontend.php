@@ -73,6 +73,9 @@ return array(
     /* ── About page ────────────────────────────────────────── */
     'about_hero_default_subtitle'  => 'Poznaj naszą historię, zespół i wartości',
 
+    /* ── Contact page ──────────────────────────────────────── */
+    'contact_hero_default_subtitle' => 'Skontaktuj się z nami',
+
     /* ── Product actions ───────────────────────────────────── */
     'choose_variants'              => 'Wybierz warianty',
     'add_to_cart'                  => 'Dodaj do koszyka',
