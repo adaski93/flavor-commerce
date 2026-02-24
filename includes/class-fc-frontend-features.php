@@ -433,7 +433,7 @@ class FC_Frontend_Features {
     public static function render_modals() {
         if ( is_admin() ) return;
         ?>
-        <?php if ( get_option( 'fc_enable_quick_view', '1' ) ) : ?>
+        <?php if ( get_theme_mod( 'flavor_archive_quick_view', true ) ) : ?>
         <!-- Quick View Modal -->
         <div class="fc-modal fc-qv-modal" id="fc-quick-view-modal" style="display:none;position:fixed;inset:0;z-index:99999;align-items:center;justify-content:center;">
             <div class="fc-modal-backdrop" style="position:absolute;inset:0;background:rgba(0,0,0,0.5);"></div>

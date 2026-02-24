@@ -3483,12 +3483,6 @@ class FC_Settings {
                             'icon'  => 'dashicons-heart',
                         ),
                         array(
-                            'key'   => 'fc_enable_quick_view',
-                            'label' => fc__( 'set_quick_view' ),
-                            'desc'  => fc__( 'set_quick_view_button_on_the_product_card_preview_in_a' ),
-                            'icon'  => 'dashicons-visibility',
-                        ),
-                        array(
                             'key'   => 'fc_enable_compare',
                             'label' => fc__( 'set_product_comparison' ),
                             'desc'  => fc__( 'set_customers_can_compare_parameters_of_selected_produ' ),

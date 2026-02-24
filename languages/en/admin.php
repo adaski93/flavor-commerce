@@ -873,6 +873,8 @@ return array(
     'cust_card_min_width'          => 'Min. card width (px)',
     'cust_archive_view_toggle'     => 'Grid/list view toggle',
     'cust_archive_view_toggle_desc' => 'Show buttons to switch between grid and list view on the shop page.',
+    'cust_archive_quick_view'      => 'Quick view',
+    'cust_archive_quick_view_desc' => 'Quick View button on the product card — preview in a modal without navigating to the page.',
     'cust_single_product_heading'  => 'Single product settings',
     'cust_img_ratio'               => 'Product image ratio',
     'cust_img_ratio_square'        => 'Square (1:1)',

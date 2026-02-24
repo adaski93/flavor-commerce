@@ -873,6 +873,8 @@ return array(
     'cust_card_min_width'          => 'Min. szerokość kafelka (px)',
     'cust_archive_view_toggle'     => 'Przełącznik widoku siatka/lista',
     'cust_archive_view_toggle_desc' => 'Pokaż przyciski do zmiany widoku produktów na stronie sklepu (siatka / lista).',
+    'cust_archive_quick_view'      => 'Szybki podgląd',
+    'cust_archive_quick_view_desc' => 'Przycisk Quick View na karcie produktu — podgląd w modalu bez przechodzenia na stronę.',
     'cust_single_product_heading'  => 'Ustawienia pojedynczego produktu',
     'cust_img_ratio'               => 'Proporcje zdjęcia produktu',
     'cust_img_ratio_square'        => 'Kwadrat (1:1)',
