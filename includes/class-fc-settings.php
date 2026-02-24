@@ -3501,12 +3501,6 @@ class FC_Settings {
                             'icon'  => 'dashicons-bell',
                         ),
                         array(
-                            'key'   => 'fc_enable_view_toggle',
-                            'label' => fc__( 'set_grid_list_view_toggle' ),
-                            'desc'  => fc__( 'set_buttons_to_switch_product_view_on_the_store_page_g' ),
-                            'icon'  => 'dashicons-grid-view',
-                        ),
-                        array(
                             'key'   => 'fc_enable_badges',
                             'label' => fc__( 'set_product_badges' ),
                             'desc'  => fc__( 'set_colorful_labels_on_product_cards_bestseller_new_ec' ),

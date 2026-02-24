@@ -871,6 +871,8 @@ return array(
     'cust_archive_desc'            => 'Product archive page settings.',
     'cust_products_per_row'        => 'Products per row',
     'cust_card_min_width'          => 'Min. card width (px)',
+    'cust_archive_view_toggle'     => 'Grid/list view toggle',
+    'cust_archive_view_toggle_desc' => 'Show buttons to switch between grid and list view on the shop page.',
     'cust_single_product_heading'  => 'Single product settings',
     'cust_img_ratio'               => 'Product image ratio',
     'cust_img_ratio_square'        => 'Square (1:1)',

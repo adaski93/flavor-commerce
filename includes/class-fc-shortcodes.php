@@ -481,7 +481,7 @@ class FC_Shortcodes {
                         </ul>
                     </div>
                 </div>
-                <?php if ( get_option( 'fc_enable_view_toggle', '1' ) ) : ?>
+                <?php if ( get_theme_mod( 'flavor_archive_view_toggle', true ) ) : ?>
                 <div class="fc-view-toggles">
                     <button type="button" class="fc-view-toggle active" data-view="grid" title="<?php echo esc_attr( fc__( 'grid_view' ) ); ?>">
                         <span class="dashicons dashicons-grid-view"></span>

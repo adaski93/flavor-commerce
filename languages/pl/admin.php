@@ -871,6 +871,8 @@ return array(
     'cust_archive_desc'            => 'Ustawienia strony archiwum produktów.',
     'cust_products_per_row'        => 'Ilość produktów w linii',
     'cust_card_min_width'          => 'Min. szerokość kafelka (px)',
+    'cust_archive_view_toggle'     => 'Przełącznik widoku siatka/lista',
+    'cust_archive_view_toggle_desc' => 'Pokaż przyciski do zmiany widoku produktów na stronie sklepu (siatka / lista).',
     'cust_single_product_heading'  => 'Ustawienia pojedynczego produktu',
     'cust_img_ratio'               => 'Proporcje zdjęcia produktu',
     'cust_img_ratio_square'        => 'Kwadrat (1:1)',
