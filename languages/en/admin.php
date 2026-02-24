@@ -1270,6 +1270,7 @@ return array(
     'cust_about_testimonials_author' => 'Author name',
     'cust_about_testimonials_role' => 'Author role / company',
     'cust_about_testimonials_country' => 'Country (flag)',
+    'cust_about_search'            => 'Search...',
     'cust_about_timeline'          => 'Timeline',
     'cust_about_timeline_title'    => 'Section title',
     'cust_about_timeline_add'      => 'Add entry',
