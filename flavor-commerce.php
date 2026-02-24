@@ -791,8 +791,8 @@ final class Flavor_Commerce {
         foreach ( $icons as $icon ) {
             if ( empty( $icon['enabled'] ) ) continue;
             $key = $icon['key'] ?? '';
-            if ( $key === 'compare' && ! get_option( 'fc_enable_compare', '1' ) ) continue;
-            if ( $key === 'wishlist' && ! get_option( 'fc_enable_wishlist', '1' ) ) continue;
+            if ( $key === 'compare' && ! get_theme_mod( 'flavor_archive_compare', true ) ) continue;
+            if ( $key === 'wishlist' && ! get_theme_mod( 'flavor_archive_wishlist', true ) ) continue;
             if ( $key === 'wishlist' && ! class_exists( 'FC_Wishlist' ) ) continue;
             $tabs[] = $key;
         }

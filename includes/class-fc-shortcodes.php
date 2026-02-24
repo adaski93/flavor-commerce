@@ -646,13 +646,13 @@ class FC_Shortcodes {
             <div class="fc-card-actions">
                 <?php
                 // Serduszko wishlist (N5)
-                if ( get_option( 'fc_enable_wishlist', '1' ) && class_exists( 'FC_Wishlist' ) ) {
+                if ( get_theme_mod( 'flavor_archive_wishlist', true ) && class_exists( 'FC_Wishlist' ) ) {
                     FC_Wishlist::render_heart_button( $product_id );
                 }
                 // Quick View (N4)
                 if ( class_exists( 'FC_Frontend_Features' ) ) {
                     if ( get_theme_mod( 'flavor_archive_quick_view', true ) ) FC_Frontend_Features::render_quick_view_button( $product_id );
-                    if ( get_option( 'fc_enable_compare', '1' ) ) FC_Frontend_Features::render_compare_button( $product_id );
+                    if ( get_theme_mod( 'flavor_archive_compare', true ) ) FC_Frontend_Features::render_compare_button( $product_id );
                 }
                 ?>
             </div>

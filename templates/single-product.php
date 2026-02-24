@@ -397,7 +397,7 @@ while ( have_posts() ) : the_post();
                 $single_cls = 'fc-single-action-btn fc-action-btn--' . esc_attr( $btn_shape ) . ' fc-single-btn--' . esc_attr( $btn_style );
             ?>
             <div class="fc-single-action-buttons">
-                <?php if ( get_option( 'fc_enable_wishlist', '1' ) && class_exists( 'FC_Wishlist' ) ) :
+                <?php if ( get_theme_mod( 'flavor_archive_wishlist', true ) && class_exists( 'FC_Wishlist' ) ) :
                     $is_fav = FC_Wishlist::is_in_wishlist( $product_id, get_current_user_id() );
                 ?>
                     <button type="button" class="<?php echo esc_attr( $single_cls ); ?> fc-wishlist-btn<?php echo $is_fav ? ' active' : ''; ?>"
@@ -407,7 +407,7 @@ while ( have_posts() ) : the_post();
                         <span><?php echo $is_fav ? fc__( 'in_wishlist' ) : fc__( 'to_wishlist' ); ?></span>
                     </button>
                 <?php endif; ?>
-                <?php if ( get_option( 'fc_enable_compare', '1' ) && class_exists( 'FC_Frontend_Features' ) ) :
+                <?php if ( get_theme_mod( 'flavor_archive_compare', '1' ) && class_exists( 'FC_Frontend_Features' ) ) :
                     $is_compared = isset( $_SESSION['fc_compare'] ) && in_array( $product_id, $_SESSION['fc_compare'] );
                 ?>
                     <button type="button" class="<?php echo esc_attr( $single_cls ); ?> fc-compare-btn<?php echo $is_compared ? ' active' : ''; ?>"

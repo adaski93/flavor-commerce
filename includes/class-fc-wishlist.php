@@ -187,7 +187,7 @@ class FC_Wishlist {
      * Shortcode [fc_wishlist] — strona z listą życzeń
      */
     public static function shortcode( $atts ) {
-        if ( ! get_option( 'fc_enable_wishlist', '1' ) ) {
+        if ( ! get_theme_mod( 'flavor_archive_wishlist', true ) ) {
             global $wp_query;
             $wp_query->set_404();
             status_header( 404 );

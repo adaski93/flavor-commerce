@@ -3477,18 +3477,6 @@ class FC_Settings {
                     <?php
                     $features = array(
                         array(
-                            'key'   => 'fc_enable_wishlist',
-                            'label' => fc__( 'set_wishlist' ),
-                            'desc'  => fc__( 'set_customers_can_add_products_to_a_wishlist_heart_ico' ),
-                            'icon'  => 'dashicons-heart',
-                        ),
-                        array(
-                            'key'   => 'fc_enable_compare',
-                            'label' => fc__( 'set_product_comparison' ),
-                            'desc'  => fc__( 'set_customers_can_compare_parameters_of_selected_produ' ),
-                            'icon'  => 'dashicons-columns',
-                        ),
-                        array(
                             'key'   => 'fc_enable_stock_notify',
                             'label' => fc__( 'set_availability_notification' ),
                             'desc'  => fc__( 'set_email_notification_signup_form_when_a_product_is_b' ),
